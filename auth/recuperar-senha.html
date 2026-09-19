@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - Guia Comercial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f8fafc; color: #333333; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: #ffffff; padding: 30px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .logo-topo { display: block; text-align: center; margin-bottom: 22px; }
+        .logo-topo img { max-height: 52px; width: auto; }
+        h2 { font-size: 1.5rem; color: #0f172a; margin-bottom: 8px; }
+        p { color: #64748b; font-size: 0.9rem; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; font-size: 0.85rem; color: #334155; margin-bottom: 6px; }
+        input[type="email"] { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none; }
+        .btn { background-color: #2563eb; color: #ffffff; border: none; padding: 12px; font-size: 1rem; font-weight: 700; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn:hover { background-color: #1d4ed8; }
+        .back-link { display: block; text-align: center; margin-top: 15px; color: #64748b; text-decoration: none; font-size: 0.85rem; }
+        .back-link:hover { color: #2563eb; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <!-- Esta era a única página sem a logo. Quem chega aqui vem de
+             um link no meio de um problema — reconhecer a marca é o que
+             dá segurança de que está no lugar certo, e não numa página
+             falsa pedindo o e-mail. -->
+        <a href="../index.html" class="logo-topo">
+            <img src="../assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis">
+        </a>
+
+        <h2>Recuperar Senha</h2>
+        <p>Digite seu e-mail cadastrado para receber as instruções de redefinição.</p>
+        
+        <form id="form-recuperar">
+            <div class="form-group">
+                <label for="recuperar-email">E-mail *</label>
+                <input type="email" id="recuperar-email" placeholder="seu-email@dominio.com" required>
+            </div>
+            
+            <button type="submit" class="btn">ENVIAR E-MAIL DE RECUPERAÇÃO</button>
+        </form>
+
+        <a href="login.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Voltar para o Login</a>
+    </div>
+
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = window.CONFIG_SUPABASE.url;
+        const SUPABASE_ANON_KEY = window.CONFIG_SUPABASE.chavePublica;
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        document.getElementById('form-recuperar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const email = document.getElementById('recuperar-email').value;
+
+                // Monta a URL de redirecionamento com base em onde esta página está rodando agora
+                // (funciona tanto em 127.0.0.1:5500 quanto no site publicado, sem caminho fixo)
+                const urlRedirect = window.location.origin + window.location.pathname.replace('recuperar-senha.html', 'login.html');
+
+                const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: urlRedirect,
+                });
+
+                if (error) {
+                    alert('Erro ao enviar e-mail: ' + error.message);
+                    return;
+                }
+
+                alert('E-mail de recuperação enviado com sucesso! Verifique sua caixa de entrada.');
+                window.location.href = 'login.html';
+
+            } catch (err) {
+                console.error('Erro inesperado ao recuperar senha:', err);
+                alert('Ocorreu um erro inesperado: ' + (err.message || err));
+            }
+        });
+    </script>
+</body>
+</html>

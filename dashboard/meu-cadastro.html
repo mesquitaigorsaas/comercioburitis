@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Cadastro - Guia Buritis</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+
+    <style>
+        .cadastro-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 28px;
+            max-width: 720px;
+        }
+
+        .cadastro-secao {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 18px;
+            margin: 26px 0 16px;
+        }
+
+        .cadastro-secao:first-of-type {
+            border-top: none;
+            padding-top: 0;
+            margin-top: 0;
+        }
+
+        .campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+
+        .campo label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .campo input {
+            padding: 11px 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .campo input:focus { border-color: #2563eb; }
+
+        /* Documento e e-mail não se editam por aqui. Ficam visíveis
+           porque a pessoa precisa conferir o que está gravado, mas
+           apagados o suficiente para não parecerem um campo comum. */
+        .campo input[readonly] {
+            background: #f8fafc;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .campo-nota {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .linha-cep { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        @media (max-width: 620px) {
+            .linha, .linha-cep { grid-template-columns: 1fr; }
+        }
+
+        .aviso {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 12px 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .aviso.ok { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .aviso.erro { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .aviso.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+        .rodape-form {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 26px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-salvar {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 22px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-salvar:hover { background: #1d4ed8; }
+        .btn-salvar:disabled { opacity: 0.6; cursor: wait; }
+
+        .btn-voltar {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-voltar:hover { color: #2563eb; }
+    </style>
+</head>
+<body>
+
+    <header class="dashboard-header">
+        <div class="container dash-nav">
+            <a href="../index.html" class="logo">
+                <img src="../assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis" style="max-height: 52px; width: auto;">
+            </a>
+            <div class="user-info">
+                <a href="dashboard.html" class="btn-admin">
+                    <i class="fa-solid fa-gauge-high"></i> Meu painel
+                </a>
+                <a href="../index.html" class="btn-exit" id="btnSair"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-main section-padding">
+        <div class="container">
+
+            <div class="dash-welcome">
+                <div>
+                    <h2>Meu Cadastro</h2>
+                    <p>Seus dados de responsável pela loja. Não aparecem no anúncio.</p>
+                </div>
+            </div>
+
+            <div id="carregando" class="empty-state" style="text-align:center; padding:40px; color:#64748b;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:30px; margin-bottom:12px; color:#cbd5e1;"></i>
+                <p>Carregando seu cadastro...</p>
+            </div>
+
+            <div class="cadastro-card" id="cartao" style="display:none;">
+                <div id="recado"></div>
+
+                <form id="formCadastro">
+                    <p class="cadastro-secao">Quem é você</p>
+
+                    <div class="campo">
+                        <label for="nome">Nome Completo *</label>
+                        <input type="text" id="nome" required minlength="5">
+                    </div>
+
+                    <div class="linha">
+                        <div class="campo">
+                            <label for="documento">CPF ou CNPJ *</label>
+                            <input type="text" id="documento" inputmode="numeric" required>
+                            <span class="campo-nota">
+                                Um CPF ou CNPJ vale por uma conta só, para sempre.
+                                Depois de usado no guia, não serve para outro cadastro.
+                            </span>
+                        </div>
+
+                        <div class="campo">
+                            <label for="email">E-mail *</label>
+                            <input type="email" id="email" required>
+                            <span class="campo-nota">É o e-mail de acesso à sua conta.</span>
+                        </div>
+                    </div>
+
+                    <!-- Só aparece quando o e-mail ou o documento mudam.
+                         Trocar qualquer um dos dois é mexer em quem a
+                         pessoa é para o guia; num computador emprestado
+                         e ainda logado, seria o caminho para tomar a
+                         conta de alguém. -->
+                    <div class="campo" id="blocoSenha" style="display:none;">
+                        <label for="senhaAtual">Confirme sua senha *</label>
+                        <input type="password" id="senhaAtual" placeholder="Sua senha de acesso" autocomplete="current-password">
+                        <span class="campo-nota">
+                            Pedimos a senha porque você está alterando o e-mail
+                            ou o documento da conta.
+                        </span>
+                    </div>
+
+                    <div class="campo">
+                        <label for="telefone">WhatsApp / Telefone *</label>
+                        <input type="tel" id="telefone" placeholder="(31) 99999-9999" required>
+                    </div>
+
+                    <p class="cadastro-secao">Endereço do responsável</p>
+
+                    <div class="linha-cep">
+                        <div class="campo">
+                            <label for="cep">CEP *</label>
+                            <input type="text" id="cep" placeholder="37130-000" inputmode="numeric" required>
+                        </div>
+
+                        <div class="campo">
+                            <label for="numero">Número *</label>
+                            <input type="text" id="numero" placeholder="62" required>
+                        </div>
+                    </div>
+
+                    <p class="campo-nota" id="recadoCep" style="margin: -8px 0 16px;">
+                        Digite o CEP e a rua e o bairro se preenchem sozinhos.
+                    </p>
+
+                    <div class="campo">
+                        <label for="logradouro">Endereço *</label>
+                        <input type="text" id="logradouro" placeholder="Rua, avenida ou praça" required>
+                    </div>
+
+                    <div class="campo">
+                        <label for="complemento">Complemento</label>
+                        <input type="text" id="complemento" placeholder="Sala, apto, fundos (opcional)">
+                    </div>
+
+                    <div class="campo">
+                        <label for="bairro">Bairro *</label>
+                        <input type="text" id="bairro" placeholder="Buritis" required>
+                    </div>
+
+                    <div class="linha">
+                        <div class="campo">
+                            <label for="cidade">Cidade *</label>
+                            <input type="text" id="cidade" placeholder="Belo Horizonte" required>
+                        </div>
+
+                        <div class="campo">
+                            <label for="uf">Estado *</label>
+                            <input type="text" id="uf" placeholder="MG" maxlength="2" required>
+                        </div>
+                    </div>
+
+                    <div class="rodape-form">
+                        <button type="submit" class="btn-salvar" id="btnSalvar">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar alterações
+                        </button>
+                        <a href="dashboard.html" class="btn-voltar">Voltar ao painel</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+<script src="../assets/js/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const supabaseClient = window.supabase.createClient(
+        window.CONFIG_SUPABASE.url,
+        window.CONFIG_SUPABASE.chavePublica
+    );
+
+    const soNumeros = (valor) => (valor || '').replace(/\D/g, '');
+
+    // O que estava gravado quando a tela abriu. É a comparação que diz
+    // se o e-mail ou o documento mudaram — e, portanto, se a senha
+    // precisa ser confirmada antes de salvar.
+    let emailOriginal = '';
+    let documentoOriginal = '';
+
+    function recado(tipo, texto) {
+        document.getElementById('recado').innerHTML = `
+            <div class="aviso ${tipo}">
+                <i class="fa-solid ${tipo === 'ok' ? 'fa-circle-check' : tipo === 'erro' ? 'fa-circle-exclamation' : 'fa-circle-info'}"></i>
+                <span>${texto}</span>
+            </div>`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ===== Carrega o perfil =====
+    //
+    // O banco só devolve a linha de quem pediu: a política "cada um vê
+    // o próprio perfil" cuida disso. Não é preciso filtrar por id aqui
+    // para ficar seguro — mas filtro mesmo assim, porque deixa claro no
+    // código o que se espera receber.
+    async function carregar() {
+        const { data: { user }, error: erroAuth } = await supabaseClient.auth.getUser();
+
+        if (erroAuth || !user) {
+            window.location.href = '../auth/login.html';
+            return;
+        }
+
+        const { data: perfil, error } = await supabaseClient
+            .from('perfis')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        document.getElementById('carregando').style.display = 'none';
+        document.getElementById('cartao').style.display = '';
+
+        if (error || !perfil) {
+            recado('erro', 'Não foi possível carregar seu cadastro. Recarregue a página.');
+            document.getElementById('formCadastro').style.display = 'none';
+            return;
+        }
+
+        emailOriginal = (user.email || '').toLowerCase();
+        documentoOriginal = soNumeros(perfil.documento);
+
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('documento').value = formatarDocumento(perfil.documento);
+        document.getElementById('nome').value = perfil.nome_completo || '';
+        document.getElementById('telefone').value = perfil.telefone || '';
+        document.getElementById('cep').value = perfil.cep || '';
+        document.getElementById('logradouro').value = perfil.logradouro || '';
+        document.getElementById('numero').value = perfil.numero || '';
+        document.getElementById('complemento').value = perfil.complemento || '';
+        document.getElementById('bairro').value = perfil.bairro || '';
+        document.getElementById('cidade').value = perfil.cidade || '';
+        document.getElementById('uf').value = perfil.uf || '';
+    }
+
+    // ===== CPF / CNPJ =====
+    //
+    // A mesma conta que a função documento_valido() faz no banco. Aqui
+    // ela serve para avisar antes de enviar, com uma frase que a pessoa
+    // entende; quem garante de verdade é o banco, que recusa a gravação
+    // venha ela desta tela ou de uma chamada direta à API.
+    function documentoValido(valor) {
+        const d = soNumeros(valor);
+
+        if (d.length !== 11 && d.length !== 14) return false;
+
+        // 111.111.111-11 e parentes fecham a conta por acaso, mas não
+        // são documento de ninguém.
+        if (d === d[0].repeat(d.length)) return false;
+
+        if (d.length === 11) {
+            for (let corte = 9; corte <= 10; corte++) {
+                let soma = 0;
+                for (let i = 0; i < corte; i++) {
+                    soma += Number(d[i]) * (corte + 1 - i);
+                }
+                let digito = (soma * 10) % 11;
+                if (digito === 10) digito = 0;
+                if (digito !== Number(d[corte])) return false;
+            }
+            return true;
+        }
+
+        const pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+        for (let corte = 12; corte <= 13; corte++) {
+            const usados = pesos.slice(pesos.length - corte);
+            let soma = 0;
+            for (let i = 0; i < corte; i++) {
+                soma += Number(d[i]) * usados[i];
+            }
+            const resto = soma % 11;
+            const digito = resto < 2 ? 0 : 11 - resto;
+            if (digito !== Number(d[corte])) return false;
+        }
+        return true;
+    }
+
+    function formatarDocumento(doc) {
+        const n = soNumeros(doc);
+        if (n.length === 11) return n.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        if (n.length === 14) return n.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+        return doc || '';
+    }
+
+    // ===== CEP =====
+    //
+    // Mesmo serviço que o cadastro da conta usa. Se ele estiver fora do
+    // ar, nada trava: os campos continuam lá para digitar à mão.
+    document.getElementById('cep').addEventListener('blur', async (e) => {
+        const cep = soNumeros(e.target.value);
+        const nota = document.getElementById('recadoCep');
+
+        if (cep.length !== 8) return;
+
+        nota.textContent = 'Procurando o endereço...';
+
+        try {
+            const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const endereco = await resposta.json();
+
+            if (endereco.erro) {
+                nota.textContent = 'CEP não encontrado. Preencha o endereço à mão.';
+                return;
+            }
+
+            // Sobrescreve, e não só preenche o vazio: aqui a pessoa está
+            // corrigindo um cadastro que já existe, e trocar o CEP quer
+            // dizer que mudou de endereço.
+            document.getElementById('logradouro').value = endereco.logradouro || '';
+            document.getElementById('bairro').value = endereco.bairro || '';
+            document.getElementById('cidade').value = endereco.localidade || '';
+            document.getElementById('uf').value = endereco.uf || '';
+
+            nota.textContent = 'Endereço preenchido. Confira o número e o complemento.';
+        } catch (err) {
+            nota.textContent = 'Não deu para consultar o CEP agora. Preencha à mão.';
+        }
+    });
+
+    // ===== A senha só é pedida quando muda quem a pessoa é =====
+    //
+    // Nome, telefone e endereço se corrigem sem cerimônia. E-mail e
+    // documento não: são o que identifica a conta. Pedir a senha ali
+    // fecha o caso do computador emprestado, ainda logado, em que
+    // bastaria trocar o e-mail para tomar a conta de alguém.
+    function mudouIdentidade() {
+        return document.getElementById('email').value.trim().toLowerCase() !== emailOriginal
+            || soNumeros(document.getElementById('documento').value) !== documentoOriginal;
+    }
+
+    function atualizarBlocoSenha() {
+        document.getElementById('blocoSenha').style.display = mudouIdentidade() ? '' : 'none';
+    }
+
+    document.getElementById('email').addEventListener('input', atualizarBlocoSenha);
+    document.getElementById('documento').addEventListener('input', atualizarBlocoSenha);
+
+    // ===== Salvar =====
+    document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const botao = document.getElementById('btnSalvar');
+        const emailNovo = document.getElementById('email').value.trim().toLowerCase();
+        const documentoNovo = soNumeros(document.getElementById('documento').value);
+
+        if (!documentoValido(documentoNovo)) {
+            recado('erro', 'Confira o CPF ou CNPJ: os números não fecham. Digite sem pontos ou com eles, tanto faz.');
+            return;
+        }
+
+        // Confere a senha antes de mexer em e-mail ou documento. Quem
+        // decide se ela presta é o servidor, não esta tela.
+        if (mudouIdentidade()) {
+            const senha = document.getElementById('senhaAtual').value;
+
+            if (!senha) {
+                recado('erro', 'Digite sua senha para confirmar a alteração do e-mail ou do documento.');
+                return;
+            }
+
+            botao.disabled = true;
+            const { error: erroSenha } = await supabaseClient.auth.signInWithPassword({
+                email: emailOriginal,
+                password: senha
+            });
+
+            if (erroSenha) {
+                botao.disabled = false;
+                recado('erro', 'Senha incorreta. O cadastro não foi alterado.');
+                return;
+            }
+        }
+
+        botao.disabled = true;
+        const { data: { user } } = await supabaseClient.auth.getUser();
+
+        const { error } = await supabaseClient
+            .from('perfis')
+            .update({
+                nome_completo: document.getElementById('nome').value.trim(),
+                documento: documentoNovo,
+                telefone: document.getElementById('telefone').value.trim(),
+                cep: soNumeros(document.getElementById('cep').value),
+                logradouro: document.getElementById('logradouro').value.trim(),
+                numero: document.getElementById('numero').value.trim(),
+                complemento: document.getElementById('complemento').value.trim() || null,
+                bairro: document.getElementById('bairro').value.trim(),
+                cidade: document.getElementById('cidade').value.trim(),
+                uf: document.getElementById('uf').value.trim().toUpperCase()
+            })
+            .eq('id', user.id);
+
+        if (error) {
+            botao.disabled = false;
+            recado('erro', mensagemDoBanco(error.message));
+            return;
+        }
+
+        documentoOriginal = documentoNovo;
+
+        // O e-mail mora na conta de login, e não no perfil: é outra
+        // chamada. Fica por último de propósito — se falhar, o resto do
+        // cadastro já está salvo, e a pessoa só precisa tentar o e-mail
+        // de novo em vez de preencher tudo outra vez.
+        if (emailNovo !== emailOriginal) {
+            const { error: erroEmail } = await supabaseClient.auth.updateUser({ email: emailNovo });
+
+            botao.disabled = false;
+
+            if (erroEmail) {
+                recado('erro', 'Os dados foram salvos, mas o e-mail não mudou: ' + erroEmail.message);
+                return;
+            }
+
+            emailOriginal = emailNovo;
+            atualizarBlocoSenha();
+            document.getElementById('senhaAtual').value = '';
+            recado('ok', 'Cadastro atualizado. Se o guia pedir confirmação, ela chega no e-mail novo.');
+            return;
+        }
+
+        botao.disabled = false;
+        atualizarBlocoSenha();
+        document.getElementById('senhaAtual').value = '';
+        recado('ok', 'Cadastro atualizado.');
+    });
+
+    // As mensagens cruas do banco citam o nome da regra que falhou, que
+    // não diz nada a quem está na tela.
+    function mensagemDoBanco(bruta) {
+        if (/já foi usado no guia/i.test(bruta)) {
+            return 'Este CPF/CNPJ já foi usado no guia e não pode ser cadastrado de novo. '
+                 + 'Se ele é seu e você acha que houve engano, fale com o guia pelo Fale Conosco.';
+        }
+        if (/perfis_documento_key|duplicate key/i.test(bruta)) {
+            return 'Este CPF/CNPJ já está em outra conta do guia.';
+        }
+        if (/documento_valido|perfis_documento_check/i.test(bruta)) {
+            return 'Confira o CPF ou CNPJ: os números não fecham.';
+        }
+        if (/nome_completo/.test(bruta)) return 'O nome precisa ter pelo menos 5 letras.';
+        if (/telefone/.test(bruta)) return 'Confira o telefone: precisa ter DDD e o número completo.';
+        if (/cep/.test(bruta)) return 'Confira o CEP: são 8 números.';
+        return 'Não foi possível salvar: ' + bruta;
+    }
+
+    // ===== Sair =====
+    document.getElementById('btnSair').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await supabaseClient.auth.signOut();
+        window.location.href = '../index.html';
+    });
+
+    window.addEventListener('DOMContentLoaded', carregar);
+</script>
+</body>
+</html>

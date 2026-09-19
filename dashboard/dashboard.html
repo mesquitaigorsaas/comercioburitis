@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Anunciante - Guia Buritis</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+
+    <style>
+        /* ===== Plano e pagamento ===== */
+        .recado-pagamento { border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 15px; display: flex; gap: 10px; align-items: flex-start; }
+        .recado-pagamento.ok { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .recado-pagamento.espera { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
+        .recado-pagamento.erro { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .aviso-plano { border-radius: 8px; padding: 14px 18px; margin-bottom: 18px; font-size: 15px; line-height: 1.5; }
+        .aviso-plano.falta { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+        .aviso-plano.ok { background: #f0f9ff; color: #075985; border: 1px solid #bae6fd; }
+
+        .planos-pagar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .plano-pagar { border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 6px; background: #fff; position: relative; }
+        .plano-pagar.escolhido { border: 2px solid #2563eb; box-shadow: 0 6px 20px -12px rgba(37, 99, 235, .6); }
+        .plano-pagar .selo { position: absolute; top: -10px; right: 12px; background: #f97316; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+        .plano-pagar h4 { font-size: 16px; color: #1e293b; }
+        .plano-pagar .preco { font-size: 24px; font-weight: 800; color: #0f172a; }
+        .plano-pagar .por-mes { font-size: 13px; color: #64748b; }
+        .plano-pagar button, .destaque-pagar button { margin-top: 8px; padding: 10px 14px; border: none; border-radius: 6px; background: #2563eb; color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .plano-pagar button:hover, .destaque-pagar button:hover { background: #1d4ed8; }
+        .plano-pagar button:disabled, .destaque-pagar button:disabled { opacity: .6; cursor: wait; }
+
+        .destaque-pagar { margin-top: 18px; border: 1px dashed #f59e0b; background: #fffbeb; border-radius: 10px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .destaque-pagar p { color: #78350f; font-size: 14px; }
+        .destaque-pagar button { background: #f59e0b; margin-top: 0; }
+        .destaque-pagar button:hover { background: #d97706; }
+
+        .formas-pagar { margin-top: 14px; font-size: 13px; color: #64748b; }
+
+        @media (max-width: 760px) { .planos-pagar { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header class="dashboard-header">
+        <div class="container dash-nav">
+            <a href="../index.html" class="logo">
+                <img src="../assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis" style="max-height: 52px; width: auto;">
+            </a>
+            <div class="user-info">
+                <!-- Só aparece para quem é administrador do guia; o
+                     JavaScript pergunta ao banco antes de mostrar. -->
+                <a href="../admin/painel.html" class="btn-admin" id="linkAdmin" style="display:none;">
+                    <i class="fa-solid fa-sliders"></i> Administração
+                </a>
+                <span>Bem-vindo ao seu painel</span>
+                <!-- Era um link direto para a index, o que só parecia
+                     sair: a sessão continuava aberta e bastava voltar
+                     para o painel para estar logado de novo. Agora
+                     encerra a sessão antes de sair. -->
+                <a href="../index.html" class="btn-exit" id="btnSair"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-main section-padding">
+        <div class="container">
+
+            <div class="dash-welcome">
+                <div>
+                    <h2>Painel de Controle</h2>
+                    <p>Gerencie as informações e visualizações do seu anúncio comercial.</p>
+                    <!-- Os dois cadastros que a pessoa tem: o dela e o da
+                         loja. O da loja fica no botão azul ao lado e no
+                         cartão abaixo; o pessoal só existia no momento de
+                         criar a conta, e depois não havia como corrigir
+                         um telefone ou uma mudança de endereço. -->
+                    <p style="margin-top: 10px;">
+                        <a href="meu-cadastro.html" style="color:#2563eb; font-weight:600; font-size:14px; text-decoration:none;">
+                            <i class="fa-solid fa-id-card"></i> Editar meu cadastro pessoal
+                        </a>
+                    </p>
+                </div>
+                <!-- O botão aqui é montado dinamicamente pelo JS: só aparece "Novo Anúncio" se ainda não existir loja -->
+                <div id="botaoTopoWrapper"></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span>Visualizações Totais</span>
+                        <h4>0</h4>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span>Cliques no WhatsApp</span>
+                        <h4>0</h4>
+                    </div>
+                </div>
+
+                <!-- Contar anúncios não fazia sentido: cada anunciante
+                     tem uma loja só, então o número seria sempre 1.
+                     No lugar, a situação do anúncio. -->
+                <div class="stat-card">
+                    <div class="stat-icon green" id="iconeSituacao">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span>Situação do anúncio</span>
+                        <h4 id="situacaoAnuncio">—</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recado da volta do Mercado Pago (?pagamento=aprovado etc.) -->
+            <div id="recadoPagamento" class="recado-pagamento" style="display:none;"></div>
+
+            <div class="dash-content-box">
+                <div class="box-header">
+                    <h3><i class="fa-solid fa-list-check"></i> Meus Anúncios Cadastrados</h3>
+                </div>
+
+                <div id="user-listings-container">
+                    <div class="empty-state" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px; margin-bottom: 12px; color: #cbd5e1;"></i>
+                        <p>Carregando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plano e pagamento. Montado pelo JavaScript: muda conforme
+                 a loja está no ar, vencida ou esperando o primeiro
+                 pagamento. -->
+            <div class="dash-content-box" id="caixaPlano" style="display:none; margin-top: 24px;">
+                <div class="box-header">
+                    <h3><i class="fa-solid fa-credit-card"></i> Plano e pagamento</h3>
+                </div>
+                <div id="conteudoPlano"></div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/regras.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = window.CONFIG_SUPABASE.url;
+    const SUPABASE_ANON_KEY = window.CONFIG_SUPABASE.chavePublica;
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function carregarPainelRestrito() {
+        try {
+            const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+            if (authError || !user) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+
+            const { data: anuncios, error } = await supabaseClient
+                .from('anuncios')
+                .select('*')
+                .eq('user_id', user.id);
+
+            // Atalho para a administração, só para quem é administrador.
+            // Quem decide é o banco; se responder que não, o link
+            // simplesmente não aparece.
+            supabaseClient.rpc('eh_admin').then(({ data }) => {
+                if (data === true) {
+                    document.getElementById('linkAdmin').style.display = '';
+                }
+            });
+
+            const container = document.getElementById('user-listings-container');
+            const botaoTopoWrapper = document.getElementById('botaoTopoWrapper');
+
+            if (error) {
+                console.error('Erro ao buscar anúncios:', error);
+                container.innerHTML = `
+                    <div class="empty-state" style="text-align: center; padding: 40px; color: #e11d48;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 30px; margin-bottom: 12px;"></i>
+                        <p>Erro ao carregar seus anúncios: ${error.message}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!anuncios || anuncios.length === 0) {
+                // Sem loja cadastrada: mostra botão de criar (única opção disponível)
+                botaoTopoWrapper.innerHTML = `
+                    <a href="cadastrar-anuncio.html" class="btn-primary-dash">
+                        <i class="fa-solid fa-plus"></i> Novo Anúncio
+                    </a>
+                `;
+                container.innerHTML = `
+                    <div class="empty-state" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fa-solid fa-folder-open" style="font-size: 40px; margin-bottom: 12px; color: #cbd5e1;"></i>
+                        <p>Você ainda não possui sua loja cadastrada.</p>
+                        <a href="cadastrar-anuncio.html" class="btn-primary-dash" style="margin-top: 15px; display: inline-block; padding: 10px 20px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px;">Cadastrar Minha Loja</a>
+                    </div>
+                `;
+
+                // Ainda não há loja: o cartão de situação diz isso, em
+                // cinza, em vez de continuar com o traço inicial.
+                document.getElementById('situacaoAnuncio').innerText = 'Não cadastrado';
+                document.getElementById('iconeSituacao').className = 'stat-icon orange';
+                document.getElementById('iconeSituacao').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+                return;
+            }
+
+            const anuncio = anuncios[0]; // Pega a única loja permitida (regra de 1 loja por conta)
+
+            // Já tem loja: o botão do topo vira "Editar Anúncio" (nunca "Novo Anúncio")
+            botaoTopoWrapper.innerHTML = `
+                <a href="cadastrar-anuncio.html?id=${anuncio.id}" class="btn-primary-dash">
+                    <i class="fa-solid fa-pen"></i> Editar Anúncio
+                </a>
+            `;
+
+            // Atualiza as métricas reais com base no banco de dados
+            document.querySelector('.stat-card:nth-child(1) h4').innerText = anuncio.visualizacoes || 0;
+            document.querySelector('.stat-card:nth-child(2) h4').innerText = anuncio.cliques_whatsapp || 0;
+            // Situação de verdade, a mesma regra que o banco usa para
+            // decidir quem aparece na busca: ativo e (táxi ou vencimento
+            // de hoje em diante). O anunciante precisa saber quando está
+            // fora, em vez de achar que está aparecendo no site.
+            const situacao = situacaoDoAnuncio(anuncio);
+            const noAr = situacao === 'no-ar';
+            const icone = document.getElementById('iconeSituacao');
+
+            document.getElementById('situacaoAnuncio').innerText = {
+                'no-ar': 'No ar',
+                'fora': 'Fora do ar',
+                'aguardando': 'Aguardando pagamento',
+                'vencido': 'Plano vencido'
+            }[situacao];
+            icone.className = noAr ? 'stat-icon green' : 'stat-icon orange';
+            icone.innerHTML = noAr
+                ? '<i class="fa-solid fa-circle-check"></i>'
+                : '<i class="fa-solid fa-circle-minus"></i>';
+
+            desenharPlano(anuncio, situacao);
+
+            // Até quando o plano desta loja vale. Quem decide é o banco
+            // (vence_em, que o pagamento estende); a conta de regras.js
+            // fica só para o anúncio antigo que ainda não tem a data.
+            const validadePlano = anuncio.vence_em
+                ? dataEscrita(anuncio.vence_em)
+                : window.REGRAS.validadeEscrita(anuncio.criado_em, anuncio.plano, anuncio.categoria);
+            const nomeDoPlano = anuncio.plano
+                ? anuncio.plano.charAt(0).toUpperCase() + anuncio.plano.slice(1)
+                : '';
+
+            container.innerHTML = `
+                <div class="listing-item-dash" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="${anuncio.imagem_url || 'https://via.placeholder.com/80'}" alt="${anuncio.titulo || 'Loja'}" style="width: 80px; height: 80px; object-fit: contain; background:#f1f5f9; border-radius: 6px;">
+                        <div>
+                            <h4 style="font-size: 18px; color: #1e293b; margin-bottom: 4px;">${anuncio.titulo || 'Estabelecimento'}</h4>
+                            <p style="color: #64748b; font-size: 14px;"><i class="fa-solid fa-tag"></i> ${anuncio.categoria || 'Geral'}</p>
+                            ${validadePlano ? `<p style="color: #64748b; font-size: 14px; margin-top: 2px;"><i class="fa-solid fa-calendar-check"></i> Plano ${nomeDoPlano} &middot; válido até ${validadePlano}</p>` : ''}
+                            <span style="display: inline-block; margin-top: 6px; padding: 2px 8px; background: #dcfce7; color: #166534; border-radius: 4px; font-size: 12px; font-weight: 600;">${anuncio.status || 'Anúncio ativo ou pendente de regularização'}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="../anuncio-detalhes.html?id=${anuncio.id}" style="padding: 8px 14px; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;"><i class="fa-solid fa-eye"></i> Ver Loja</a>
+                        <a href="cadastrar-anuncio.html?id=${anuncio.id}" style="padding: 8px 14px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;"><i class="fa-solid fa-pen"></i> Editar</a>
+                    </div>
+                </div>
+            `;
+
+        } catch (err) {
+            console.error('Erro inesperado no painel:', err);
+            const container = document.getElementById('user-listings-container');
+            container.innerHTML = `
+                <div class="empty-state" style="text-align: center; padding: 40px; color: #e11d48;">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 30px; margin-bottom: 12px;"></i>
+                    <p>Ocorreu um erro inesperado ao carregar o painel.</p>
+                    <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">${err.message || err}</p>
+                </div>
+            `;
+        }
+    }
+
+    // ===== Plano e pagamento =====
+    //
+    // Os preços aqui só desenham a tela. Quem cobra é a Edge Function
+    // criar-pagamento, com a tabela dela: mudar um número só aqui não
+    // muda o que o Mercado Pago cobra.
+    const PLANOS_PAGAR = [
+        { id: 'trimestral', nome: 'Trimestral', preco: 29.70, meses: 3 },
+        { id: 'semestral', nome: 'Semestral', preco: 53.46, meses: 6 },
+        { id: 'anual', nome: 'Anual', preco: 100.98, meses: 12, selo: 'Melhor custo-benefício' }
+    ];
+
+    const reais = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    // "2026-12-10" → "10/12/2026", sem passar pelo fuso: new Date() leria
+    // a data como meia-noite em UTC e mostraria o dia anterior no Brasil.
+    function dataEscrita(iso) {
+        const [a, m, d] = String(iso).split('-');
+        return `${d}/${m}/${a}`;
+    }
+
+    function hojeNoBrasil() {
+        return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+    }
+
+    function situacaoDoAnuncio(anuncio) {
+        if (anuncio.ativo === false) return 'fora';
+        if (window.REGRAS.ehGratuita(anuncio.categoria)) return 'no-ar';
+        if (!anuncio.vence_em) return 'aguardando';
+        return anuncio.vence_em >= hojeNoBrasil() ? 'no-ar' : 'vencido';
+    }
+
+    function desenharPlano(anuncio, situacao) {
+        const caixa = document.getElementById('caixaPlano');
+        const conteudo = document.getElementById('conteudoPlano');
+
+        // Tirado do ar pelo administrador: pagar não resolve, então não
+        // oferece. O painel já diz "Fora do ar" no cartão de cima.
+        if (situacao === 'fora') return;
+
+        const gratuita = window.REGRAS.ehGratuita(anuncio.categoria);
+
+        // O plano que a pessoa escolheu na página de planos vem no
+        // endereço (?plano=anual) e fica marcado aqui.
+        const escolhido = new URLSearchParams(location.search).get('plano');
+
+        let aviso = '';
+        if (situacao === 'aguardando') {
+            aviso = `<div class="aviso-plano falta"><strong>Sua loja está cadastrada, mas ainda não aparece no guia.</strong><br>Escolha um plano e pague com Pix ou cartão: assim que o pagamento for aprovado, ela entra no ar sozinha.</div>`;
+        } else if (situacao === 'vencido') {
+            aviso = `<div class="aviso-plano falta"><strong>O plano venceu em ${dataEscrita(anuncio.vence_em)} e a loja saiu da busca.</strong><br>Renove abaixo para ela voltar na hora, com tudo como estava.</div>`;
+        } else if (!gratuita) {
+            aviso = `<div class="aviso-plano ok">Sua loja está no ar até <strong>${dataEscrita(anuncio.vence_em)}</strong>. Pode renovar adiantado: o novo prazo começa quando o atual termina, e você não perde nenhum dia.</div>`;
+        }
+
+        const planos = gratuita ? '' : `
+            <div class="planos-pagar">
+                ${PLANOS_PAGAR.map((p) => `
+                    <div class="plano-pagar ${p.id === escolhido ? 'escolhido' : ''}">
+                        ${p.selo ? `<span class="selo">${p.selo}</span>` : ''}
+                        <h4>Plano ${p.nome}</h4>
+                        <div class="preco">${reais(p.preco)}</div>
+                        <div class="por-mes">${p.meses} meses · ${reais(p.preco / p.meses)} por mês · até ${window.REGRAS.fotosPorPlano[p.id]} fotos</div>
+                        <button type="button" data-tipo="plano" data-plano="${p.id}">
+                            ${situacao === 'no-ar' ? 'Renovar' : 'Contratar'} por ${reais(p.preco)}
+                        </button>
+                    </div>
+                `).join('')}
+            </div>`;
+
+        // Destaque só para quem já aparece: pagar destaque fora do ar
+        // seria pagar para não ser visto.
+        const destaqueValendo = anuncio.destaque && anuncio.destaque_ate && anuncio.destaque_ate >= hojeNoBrasil();
+        const destaque = situacao !== 'no-ar' ? '' : `
+            <div class="destaque-pagar">
+                <p><strong><i class="fa-solid fa-star"></i> Destaque por 15 dias — ${reais(120)}</strong><br>
+                ${destaqueValendo
+                    ? `Sua loja está em destaque até ${dataEscrita(anuncio.destaque_ate)}. Comprar de novo soma mais 15 dias.`
+                    : 'Sua loja aparece na frente das outras na página inicial.'}</p>
+                <button type="button" data-tipo="destaque">Quero o destaque</button>
+            </div>`;
+
+        if (!aviso && !planos && !destaque) return;
+
+        conteudo.innerHTML = `
+            ${aviso}
+            ${planos}
+            ${destaque}
+            <p class="formas-pagar"><i class="fa-solid fa-lock"></i> Pagamento seguro pelo Mercado Pago: Pix (liberação na hora) ou cartão de crédito em até 12x.</p>
+        `;
+        caixa.style.display = '';
+
+        conteudo.querySelectorAll('button[data-tipo]').forEach((botao) => {
+            botao.addEventListener('click', () => pagar(botao));
+        });
+
+        if (escolhido && situacao !== 'no-ar') {
+            caixa.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    async function pagar(botao) {
+        const textoOriginal = botao.innerHTML;
+        document.querySelectorAll('#conteudoPlano button').forEach((b) => b.disabled = true);
+        botao.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Abrindo o pagamento...';
+
+        try {
+            // O endereço do site, para o Mercado Pago saber para onde
+            // devolver a pessoa. A função só aceita os endereços do guia.
+            const voltar = location.href.split('/dashboard/')[0];
+
+            const { data, error } = await supabaseClient.functions.invoke('criar-pagamento', {
+                body: { tipo: botao.dataset.tipo, plano: botao.dataset.plano, voltar }
+            });
+
+            if (error) {
+                let mensagem = 'Não foi possível abrir o pagamento. Tente de novo em instantes.';
+                try { mensagem = (await error.context.json()).erro || mensagem; } catch { /* resposta sem corpo */ }
+                throw new Error(mensagem);
+            }
+
+            window.location.href = data.url;
+        } catch (err) {
+            alert(err.message);
+            document.querySelectorAll('#conteudoPlano button').forEach((b) => b.disabled = false);
+            botao.innerHTML = textoOriginal;
+        }
+    }
+
+    // ===== A volta do Mercado Pago =====
+    //
+    // O aviso do pagamento chega ao banco por outro caminho (a
+    // webhook-mercadopago), às vezes alguns segundos depois de a
+    // pessoa voltar. Por isso, no "aprovado", o painel confere de novo
+    // algumas vezes até ver o prazo mudar.
+    function mostrarRecadoDoPagamento() {
+        const volta = new URLSearchParams(location.search).get('pagamento');
+        if (!volta) return;
+
+        const recado = document.getElementById('recadoPagamento');
+        const textos = {
+            aprovado: ['ok', 'fa-circle-check', '<strong>Pagamento aprovado!</strong> Obrigado. Sua loja é atualizada em instantes; se ainda não mudou, esta página confere sozinha.'],
+            pendente: ['espera', 'fa-clock', '<strong>Pagamento em processamento.</strong> Assim que o Mercado Pago confirmar, sua loja é liberada sozinha. Não precisa pagar de novo.'],
+            recusado: ['erro', 'fa-circle-xmark', '<strong>O pagamento não foi aprovado.</strong> Nada foi cobrado. Tente de novo, com outro cartão ou pelo Pix.']
+        };
+        const [classe, iconeRecado, texto] = textos[volta] || textos.pendente;
+        recado.className = `recado-pagamento ${classe}`;
+        recado.innerHTML = `<i class="fa-solid ${iconeRecado}" style="margin-top:3px;"></i><span>${texto}</span>`;
+        recado.style.display = '';
+
+        if (volta === 'aprovado') {
+            let tentativas = 0;
+            const conferir = setInterval(() => {
+                tentativas += 1;
+                carregarPainelRestrito();
+                if (tentativas >= 6) clearInterval(conferir);
+            }, 5000);
+        }
+    }
+
+    // ===== Sair da conta =====
+    // Encerra a sessão antes de ir para a index. Sem isto o "Sair" só
+    // trocava de página: a pessoa continuava logada, e num computador
+    // compartilhado o próximo a sentar ali entraria no anúncio dela.
+    document.getElementById('btnSair').addEventListener('click', async (e) => {
+        e.preventDefault();
+        await supabaseClient.auth.signOut();
+        window.location.href = '../index.html';
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        mostrarRecadoDoPagamento();
+        carregarPainelRestrito();
+    });
+</script>
+</html>

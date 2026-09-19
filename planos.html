@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+        <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planos e Preços - Guia Comercial Buritis</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #333333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 2. HERO / BANNER DA PÁGINA PLANOS */
+        /* Faixa escura com o texto de verdade, em todas as telas. A capa
+           em imagem do guia de Alfenas mostrava a cidade de lá; até sair
+           uma capa do Buritis, o texto faz o papel dela. */
+        .plans-hero {
+            background:
+                radial-gradient(circle at 90% 20%, rgba(236, 25, 107, 0.35), transparent 40%),
+                linear-gradient(120deg, #18181b 0%, #27272a 60%, #7c2d12 130%);
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .capa-texto {
+            line-height: 1.5;
+            padding: 50px 20px;
+        }
+
+        .capa-frase { color: #e4e4e7 !important; margin-bottom: 10px; }
+        .capa-frase strong { color: #ff6a00; display: block; margin-top: 4px; letter-spacing: .5px; }
+
+        .plans-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .plans-hero p {
+            color: #a1a1aa;
+            font-size: 0.9rem;
+        }
+
+        .plans-hero p a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        /* 3. SEÇÃO DOS CARDS DE PLANOS */
+        .plans-section {
+            padding: 60px 0;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .plan-card {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .plan-card.featured {
+            border: 2px solid #2563eb;
+        }
+
+        /* O topo do card é a imagem do plano, e nada mais: preço, nome,
+           valor por mês e selos já vêm desenhados dentro dela.
+
+           A imagem entra inteira, sem corte: cortar pelas bordas, como
+           fazia o fundo, comeria justamente o preço e os selos quando o
+           card estreitasse. */
+        .plan-card-header {
+            background-color: #27272a;
+            line-height: 0;
+        }
+
+        .plan-card-header img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* Preço e nome continuam escritos na página, mas invisíveis:
+           leitor de tela e buscador não leem texto que está dentro de
+           uma imagem, e sem isto o plano ficaria mudo para os dois. */
+        .so-para-leitor {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
+        .plan-card-body {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 30px;
+            flex-grow: 1;
+        }
+
+        .plan-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .plan-features li i {
+            color: #22c55e;
+            font-size: 0.85rem;
+        }
+
+        /* A economia do anual em reais, e não em porcentagem: "R$ 17,82"
+           é dinheiro que a pessoa enxerga no bolso. A conta é 12 meses do
+           trimestral (R$ 118,80) menos o anual (R$ 100,98). */
+        .plan-features li.plan-economia {
+            background: #fff4ec;
+            color: #9a3412;
+            border-radius: 6px;
+            border-bottom: none;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .plan-features li.plan-economia i { color: #ff6600; }
+        .plan-features li.plan-economia strong { color: #ff6600; }
+
+        .btn-choose {
+            display: block;
+            text-align: center;
+            background-color: #334155;
+            color: #ffffff;
+            padding: 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-choose:hover {
+            background-color: #1e293b;
+        }
+
+        .btn-choose.btn-highlight {
+            background-color: #2563eb;
+        }
+
+        .btn-choose.btn-highlight:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* 4. CAIXA DE ANÚNCIO ESPECIAL */
+        .special-boost-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .boost-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .boost-icon {
+            background-color: #fef08a;
+            color: #ca8a04;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .boost-text h3 {
+            font-size: 1.1rem;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .boost-text p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .boost-price-action {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .boost-price {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .boost-price span {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: #64748b;
+        }
+
+        .btn-boost {
+            background-color: #e11d48;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-boost:hover {
+            background-color: #be123c;
+        }
+
+        /* FOOTER */
+        .main-footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            border-top: 1px solid #1e293b;
+        }
+        .faixa-promocao {
+            background-color: #ff6600;
+            color: #ffffff;
+            text-align: center;
+            padding: 14px 20px;
+            display: none;
+        }
+
+        .faixa-promocao.visivel {
+            display: block;
+        }
+
+        .faixa-promocao .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .faixa-promocao p {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .faixa-promocao p span {
+            font-weight: 400;
+            opacity: 0.92;
+        }
+
+        .faixa-promocao a {
+            background-color: #ffffff;
+            color: #ff6600;
+            padding: 9px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .faixa-promocao a:hover {
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        @media (max-width: 600px) {
+            .faixa-promocao p { font-size: 0.92rem; }
+            .faixa-promocao .container { gap: 12px; }
+        }
+
+    </style>
+    <script src="assets/js/regras.js"></script>
+    <script src="assets/js/menu-promocao.js"></script>
+    <script src="assets/js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Troca a chave de Entrar pelo atalho do painel e mostra o Sair,
+         quando ha sessao aberta. -->
+    <script src="assets/js/sessao.js" defer></script>
+    <!-- Cabecalho e menu sanduiche: um arquivo so para o site inteiro. -->
+    <link rel="stylesheet" href="assets/css/header.css">
+    <script src="assets/js/menu.js" defer></script>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis">
+            </a>
+            
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">INÍCIO</a>
+                <a href="planos.html" class="active">PLANOS</a>
+                <a href="sobrenos.html">SOBRE NÓS</a>
+                <a href="fale-conosco.html">FALE CONOSCO</a>
+            </nav>
+
+            <div class="header-actions">
+                <a href="auth/login.html" class="btn-icon-login" title="Entrar"><i class="fa-solid fa-key"></i></a>
+                <a href="planos.html" class="btn-add-listing">+ CADASTRAR ANÚNCIO</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mesma faixa da página inicial. Sem ela, quem chega direto
+         aqui vê R$ 29,70 e não fica sabendo que até 30/09 não paga
+         nada. Some sozinha em 01/10/2026, junto com a promoção. -->
+    <section class="faixa-promocao" id="faixaPromocao">
+        <div class="container">
+            <p>
+                ATÉ 30/09/2026 O CADASTRO É GRÁTIS
+                <span>&mdash; estes valores passam a valer em 01/10</span>
+            </p>
+            <a href="auth/cadastro.html">CADASTRAR AGORA</a>
+        </div>
+    </section>
+
+
+    <section class="plans-hero">
+        <div class="container capa-texto">
+            <h1>Planos</h1>
+            <p class="capa-frase">Coloque sua empresa onde seus clientes estão procurando. <strong>Guia Comercial Buritis e Região</strong></p>
+            <p><a href="index.html">Início</a> &gt; Planos</p>
+        </div>
+    </section>
+
+    <section class="plans-section">
+        <div class="container">
+            <div class="plans-grid">
+                
+                <div class="plan-card">
+                    <div class="plan-card-header">
+                        <img src="assets/img/planos/plano-trimestral.jpg" alt="Plano Trimestral por R$ 29,70, equivale a R$ 9,90 por mês">
+                        <h3 class="so-para-leitor">Plano Trimestral — R$ 29,70, equivale a R$ 9,90 por mês</h3>
+                    </div>
+                    <div class="plan-card-body">
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-check"></i> Validade : 3 Meses</li>
+                            <li><i class="fa-solid fa-check"></i> Link Para Redes Sociais e Site : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Contato direto para WhatsApp : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Endereço localizado no Google Maps : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Quant. De Imagens : 5</li>
+                            <li><i class="fa-solid fa-check"></i> Espaço para logomarca : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Horário De Funcionamento : Sim</li>
+                        </ul>
+                        <a href="auth/cadastro.html?plano=trimestral" class="btn-choose">CONTRATAR PLANO</a>
+                    </div>
+                </div>
+
+                <div class="plan-card">
+                    <div class="plan-card-header">
+                        <img src="assets/img/planos/plano-semestral.jpg" alt="Plano Semestral por R$ 53,46, equivale a R$ 8,91 por mês, com 10% de desconto">
+                        <h3 class="so-para-leitor">Plano Semestral — R$ 53,46, equivale a R$ 8,91 por mês, com 10% de desconto</h3>
+                    </div>
+                    <div class="plan-card-body">
+                        <ul class="plan-features">
+                            <li><i class="fa-solid fa-check"></i> Validade : 6 Meses</li>
+                            <li><i class="fa-solid fa-check"></i> Link Para Redes Sociais e Site : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Contato direto para WhatsApp : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Endereço localizado no Google Maps : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Quant. De Imagens : 10</li>
+                            <li><i class="fa-solid fa-check"></i> Espaço para logomarca : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Horário De Funcionamento : Sim</li>
+                        </ul>
+                        <a href="auth/cadastro.html?plano=semestral" class="btn-choose">CONTRATAR PLANO</a>
+                    </div>
+                </div>
+
+                <div class="plan-card featured">
+                    <div class="plan-card-header">
+                        <img src="assets/img/planos/plano-anual.jpg" alt="Plano Anual por R$ 100,98, equivale a R$ 8,42 por mês, com 15% de desconto. Melhor custo-benefício">
+                        <h3 class="so-para-leitor">Plano Anual — R$ 100,98, equivale a R$ 8,42 por mês, com 15% de desconto. Melhor custo-benefício</h3>
+                    </div>
+                    <div class="plan-card-body">
+                        <ul class="plan-features">
+                            <li class="plan-economia"><i class="fa-solid fa-piggy-bank"></i> Você economiza <strong>R$ 17,82</strong> no ano</li>
+                            <li><i class="fa-solid fa-check"></i> Validade : 12 Meses</li>
+                            <li><i class="fa-solid fa-check"></i> Link Para Redes Sociais e Site : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Contato direto para WhatsApp : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Endereço localizado no Google Maps : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Quant. De Imagens : 15</li>
+                            <li><i class="fa-solid fa-check"></i> Espaço para logomarca : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Horário De Funcionamento : Sim</li>
+                        </ul>
+                        <a href="auth/cadastro.html?plano=anual" class="btn-choose btn-highlight">QUERO O PLANO ANUAL</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="special-boost-box">
+                <div class="boost-content">
+                    <div class="boost-icon">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <div class="boost-text">
+                        <h3>ANÚNCIOS ESPECIAIS (Destaque no Topo)</h3>
+                        <p>Apareça no topo da página inicial para todos os visitantes durante 15 dias.</p>
+                    </div>
+                </div>
+                <div class="boost-price-action">
+                    <div class="boost-price">R$ 120,00 <span>/ 15 dias</span></div>
+                    <a href="auth/cadastro.html?add=especial" class="btn-boost">ADICIONAR DESTAQUE</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2026 Guia Comercial Buritis e Região. Todos os direitos reservados: <a href="https://mesquitasaas.online/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Mesquita SaaS</a>.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        // A faixa nasce escondida e só aparece enquanto a promoção
+        // vale. A data mora em assets/js/regras.js.
+        if (window.REGRAS.promocaoValendo()) {
+            document.getElementById('faixaPromocao').classList.add('visivel');
+        }
+    </script>
+
+</body>
+</html>

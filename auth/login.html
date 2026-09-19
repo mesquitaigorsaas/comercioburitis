@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acessar / Cadastrar - Guia Comercial Buritis</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="../assets/css/style.css">
+
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/regras.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body {
+            background-color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .auth-container {
+            max-width: 480px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f1f5f9;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+        }
+
+        .auth-body {
+            padding: 30px 25px;
+        }
+
+        .auth-form {
+            display: none;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .auth-form.active {
+            display: flex;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .input-with-icon input,
+        .input-with-icon select {
+            width: 100%;
+            padding: 12px 14px 12px 40px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-with-icon input:focus,
+        .input-with-icon select:focus {
+            border-color: #2563eb;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        /* Olhinho de mostrar/esconder a senha, dentro do campo. */
+        /* Tamanho fixo em vez de padding: o botão encolhia até 20px de
+           largura e o desenho do olho transbordava por cima da borda
+           direita do campo. Com medida própria e o conteúdo centrado,
+           ele para onde deve, com folga da linha. Os 32px também dão
+           um alvo de toque decente no celular. */
+        .btn-olho {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .btn-olho:hover {
+            color: #475569;
+        }
+
+        .input-with-icon input.com-olho {
+            padding-right: 44px;
+        }
+
+        .forgot-link {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-submit {
+            background: #2563eb;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #1d4ed8;
+        }
+
+        .auth-header-text {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .auth-header-text h2 {
+            font-size: 22px;
+            color: #1e293b;
+        }
+
+        .auth-header-text p {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .auth-alert {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0 25px;
+            margin-top: 20px;
+        }
+        .auth-alert.show { display: flex; }
+        .auth-alert.error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .auth-alert.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="../index.html" class="logo">
+                <img src="../assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis" style="max-height: 60px; width: auto;">
+            </a>
+            
+            <nav class="nav-links">
+                <a href="../index.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao site</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="auth-container">
+        <div class="auth-card">
+            
+            <div class="auth-tabs">
+                <button type="button" class="tab-btn active" style="cursor: default;">Acessar Conta</button>
+            </div>
+
+            <div id="authAlert" class="auth-alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="authAlertText"></span>
+            </div>
+
+            <div class="auth-body">
+
+                <form action="../dashboard/dashboard.html" method="GET" id="form-login" class="auth-form active">
+                    <div class="auth-header-text">
+                        <h2>Bem-vindo de volta!</h2>
+                        <p>Acesse seu painel para gerenciar seus anúncios.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-email">E-mail *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="login-email" placeholder="seu@email.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Senha *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="login-password" class="com-olho" placeholder="••••••••" required>
+                            <button type="button" class="btn-olho" id="olhoLogin" aria-label="Mostrar senha">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #475569;">
+                            <input type="checkbox"> Lembrar de mim
+                        </label>
+                        <a href="recuperar-senha.html" class="forgot-link">Esqueceu a senha?</a>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fa-solid fa-right-to-bracket"></i> ENTRAR NO PAINEL
+                    </button>
+
+                    <p style="text-align: center; font-size: 13px; color: #64748b; margin-top: 8px;">
+                        <!-- O destino muda com a promoção: enquanto for
+                             grátis vai direto ao cadastro, depois passa
+                             pelos planos. Escrito pelo JavaScript. -->
+                        Ainda não tem conta? <a href="cadastro.html" class="forgot-link" id="linkCriarConta">Cadastre sua loja</a>
+                    </p>
+                </form>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2026 Guia Comercial Buritis e Região. Todos os direitos reservados: <a href="https://mesquitasaas.online/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Mesquita SaaS</a>.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Cliente Supabase (mesmo projeto usado no restante do site)
+        const SUPABASE_URL = window.CONFIG_SUPABASE.url;
+        const SUPABASE_ANON_KEY = window.CONFIG_SUPABASE.chavePublica;
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function showAlert(type, message) {
+            const box = document.getElementById('authAlert');
+            const text = document.getElementById('authAlertText');
+            const icon = box.querySelector('i');
+            box.classList.remove('error', 'success');
+            box.classList.add(type, 'show');
+            icon.className = type === 'success' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation';
+            text.textContent = message;
+        }
+
+        function hideAlert() {
+            document.getElementById('authAlert').classList.remove('show');
+        }
+
+        function setLoading(button, loading, loadingText) {
+            if (loading) {
+                button.dataset.originalHtml = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${loadingText}`;
+            } else {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalHtml;
+            }
+        }
+
+        // ===== Olhinho da senha =====
+        document.getElementById('olhoLogin').addEventListener('click', function () {
+            const campo = document.getElementById('login-password');
+            const escondida = campo.type === 'password';
+
+            campo.type = escondida ? 'text' : 'password';
+            this.querySelector('i').className = escondida ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+            this.setAttribute('aria-label', escondida ? 'Esconder senha' : 'Mostrar senha');
+        });
+
+        // ===== Onde fica o "ainda não tem conta" =====
+        // Na promoção não há plano para escolher, então mandar a pessoa
+        // para a tabela de preços seria colocar um obstáculo no meio de
+        // algo que é de graça.
+        if (!window.REGRAS.promocaoValendo()) {
+            const link = document.getElementById('linkCriarConta');
+            link.href = '../planos.html';
+            link.textContent = 'Veja os planos e anuncie';
+        }
+
+        // =============================================================
+        // QUEM CHEGA PELO LINK DO E-MAIL JÁ ESTÁ ENTRANDO
+        // =============================================================
+        // O link de confirmação traz a sessão no próprio endereço. Sem
+        // isto, a pessoa acabava de confirmar a conta e caía numa tela
+        // pedindo a senha que ela tinha criado dois minutos antes.
+        //
+        // Vale também para quem já estava logado e clicou em "Entrar"
+        // por engano: em vez do formulário, vai direto ao painel.
+        //
+        // Usa getUser(), que pergunta ao servidor se a sessão presta.
+        // getSession() só olha o que está guardado aqui, e uma sessão
+        // vencida faria esta tela e a do painel ficarem se empurrando
+        // uma para a outra sem parar.
+        (async () => {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+
+            showAlert('success', 'Tudo certo! Levando você para o seu painel...');
+            setTimeout(() => {
+                window.location.href = '../dashboard/dashboard.html';
+            }, 900);
+        })();
+
+        // ===== LOGIN =====
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn = e.target.querySelector('.btn-submit');
+
+            setLoading(btn, true, 'Entrando...');
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            setLoading(btn, false);
+
+            if (error) {
+                showAlert('error', 'E-mail ou senha incorretos. Tente novamente.');
+                return;
+            }
+
+            // Quem faz login já tem conta, e na maioria das vezes já tem
+            // loja. O painel mostra o anúncio, os números dele e o botão
+            // de editar — cair direto no formulário de edição pulava
+            // essa visão geral e dava a impressão de que a única coisa a
+            // fazer ali era mexer no cadastro de novo.
+            window.location.href = '../dashboard/dashboard.html';
+        });
+    </script>
+</body>
+</html>

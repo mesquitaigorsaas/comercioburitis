@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Comercial Buritis e Região</title>
+    
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="assets/js/supabase-config.js"></script>
+    <script src="assets/js/regras.js"></script>
+    <script src="assets/js/menu-promocao.js"></script>
+    <script src="assets/js/loja.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #333333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 1.1. BANNER ROTATIVO (CARROSSEL INSTITUCIONAL) */
+        .banner-carousel-section {
+            background-color: #f1f5f9;
+            padding: 30px 20px 20px 20px;
+        }
+
+        .banner-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            background-color: #0f172a;
+        }
+
+        .banner-slides-container {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            width: 100%;
+        }
+
+        .banner-slide {
+            min-width: 100%;
+
+            /* A proporção EXATA das imagens: 2188 por 718.
+               Com altura fixa em 420px a proporção da caixa não batia
+               com a da imagem, e o object-fit: cover cortava as
+               laterais — bem onde ficam o nome do anunciante e o
+               telefone. Amarrando a proporção, não sobra nada para
+               cortar, e a altura acompanha a largura em qualquer tela.
+
+               Banner novo tem de sair nesta medida. Fora dela, volta
+               a cortar. */
+            aspect-ratio: 2188 / 718;
+
+            position: relative;
+            background-color: #0f172a;
+        }
+
+        .banner-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Slide "anuncie aqui", feito em HTML enquanto não há banner pago. */
+        .banner-anuncie {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 0 7%;
+            text-decoration: none;
+            color: #ffffff;
+            background:
+                radial-gradient(circle at 85% 30%, rgba(236, 25, 107, 0.55), transparent 45%),
+                radial-gradient(circle at 70% 90%, rgba(253, 197, 14, 0.45), transparent 40%),
+                linear-gradient(120deg, #0f172a 0%, #1e1b2e 55%, #ff6a00 140%);
+        }
+        .banner-anuncie strong {
+            font-size: clamp(1.1rem, 3.4vw, 2.6rem);
+            line-height: 1.15;
+            max-width: 70%;
+        }
+        .banner-anuncie-selo {
+            background: #ff6a00;
+            font-weight: 700;
+            font-size: clamp(0.6rem, 1.1vw, 0.85rem);
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border-radius: 999px;
+        }
+        .banner-anuncie-sub {
+            color: #cbd5e1;
+            font-size: clamp(0.65rem, 1.3vw, 1rem);
+        }
+        .banner-anuncie-btn {
+            background: #25d366;
+            color: #0f172a;
+            font-weight: 700;
+            font-size: clamp(0.65rem, 1.2vw, 0.95rem);
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+        @media (max-width: 560px) {
+            .banner-anuncie { gap: 6px; }
+            .banner-anuncie strong { max-width: 100%; }
+            .banner-anuncie-sub { display: none; }
+            .banner-anuncie-btn { padding: 6px 12px; }
+        }
+
+        .banner-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(15, 23, 42, 0.9));
+            color: #ffffff;
+            padding: 25px 20px;
+            text-align: left;
+        }
+
+        .banner-caption h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+            color: #f8fafc;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .banner-caption p {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            font-weight: 400;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* AJUSTES ESPECÍFICOS PARA CELULAR (MOBILE) */
+        @media (max-width: 768px) {
+            .banner-carousel-section {
+                padding: 0 !important;
+            }
+            .banner-wrapper {
+                max-width: 100% !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+            .banner-slides-container {
+                align-items: flex-start;
+            }
+            .banner-slide img {
+                object-fit: cover;
+            }
+            .banner-caption h3 { font-size: 1rem; }
+            .banner-caption p { font-size: 0.75rem; }
+        }
+
+        /* Botões de navegação do carrossel */
+        .banner-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            z-index: 10;
+        }
+
+        .banner-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .banner-prev { left: 15px; }
+        .banner-next { right: 15px; }
+
+        /* Indicadores (bolinhas) */
+        .banner-dots {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .banner-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .banner-dot.active {
+            background-color: #ffffff;
+            width: 22px;
+            border-radius: 5px;
+        }
+
+        /* 2. HERO / PESQUISA */
+        .hero-section {
+            background: #f1f5f9;
+            padding: 10px 20px 40px 20px;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 25px;
+        }
+
+        .search-box-wrapper {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 850px;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-form select {
+            flex: 1 1 250px;
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.9rem;
+            color: #475569;
+            background-color: #ffffff;
+            cursor: pointer;
+        }
+
+        .btn-search {
+            flex: 1 1 150px;
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 14px 25px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-search:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* 3. CATEGORIAS COLORIDAS FLUTUANTES */
+        .categories-container {
+            margin-top: -10px;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 60px;
+        }
+
+        /* São dez categorias na grade, e dez só fecha em fileira cheia
+           com 2 ou com 5 colunas. Por isso as duas pontas são fixas, e
+           não deixadas por conta do auto-fit:
+
+             celular  -> 2 colunas, 2+2+2+2+2
+             desktop  -> 5 colunas, 5+5
+
+           No meio, entre 600 e 900, o auto-fit resolve (4+4+2). É a
+           faixa do tablet, onde uma fileira menor não incomoda.
+
+           As duas colunas do celular são fixas por um motivo prático:
+           com auto-fit e mínimo de 125px, um aparelho de 320px fica em
+           cima do limite e às vezes cai para UMA coluna — dez fileiras
+           de um azulejo cada, uma tira comprida que empurra os anúncios
+           para fora da tela. */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .categories-grid {
+                grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+            }
+        }
+
+        @media (min-width: 900px) {
+            .categories-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        .category-card {
+            padding: 22px 10px;
+            border-radius: 8px;
+            text-align: center;
+            color: #ffffff;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .category-card i {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .category-card span {
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: block;
+        }
+
+        /* Dois azulejos mostram mais de um ícone: o de lanche mostra
+           três, o de casa mostra dois. Eles ficam numa fileira e
+           menores que o ícone único dos outros azulejos — três em
+           tamanho cheio não cabem na largura de um azulejo no celular,
+           que é de duas colunas.
+
+           Os dois azulejos usam a mesma medida, mesmo o de casa tendo
+           espaço para ícones maiores: lado a lado na grade, dois
+           tamanhos diferentes de ícone pequeno leem-se como descuido. */
+        .category-card .icones {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .category-card .icones i {
+            font-size: 1.5rem;
+            margin-bottom: 0;
+            display: inline-block;
+        }
+
+        /* O espeto é desenhado aqui, e não vem do Font Awesome, porque
+           a versão gratuita não tem espeto — o mais perto é uma coxa de
+           frango, que não é churrasquinho. */
+        .category-card .icones svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            fill: currentColor;
+        }
+
+        /* O nome mais comprido da grade, e o único que precisa de letra
+           menor: em tamanho normal ele quebra em três linhas no celular
+           e puxa a altura da fileira inteira. */
+        .category-card .rotulo-menor {
+            font-size: 0.75rem;
+        }
+
+        /* Cores dos Cards */
+        .cat-auto { background-color: #ef4444; }
+        .cat-beleza { background-color: #06b6d4; }
+        .cat-saude { background-color: #22c55e; }
+        .cat-casa { background-color: #eab308; }
+        .cat-gastro { background-color: #a855f7; }
+        .cat-imoveis { background-color: #f97316; }
+        .cat-taxi { background-color: #ec4899; }
+        .cat-pet { background-color: #14b8a6; }
+        .cat-sorvete { background-color: #6366f1; }
+        .cat-agro { background-color: #a16207; }
+
+        /* 4. LISTAGEM DE ANÚNCIOS DA CIDADE */
+        .listings-section {
+            padding: 20px 0 60px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-header h2 {
+            font-size: 1.6rem;
+            color: #0f172a;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-header p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Quando a busca é por categoria, este cabeçalho deixa de ser
+           título de seção e vira a resposta ao clique. Por isso encosta
+           na esquerda: centralizado ele continua com cara de enfeite de
+           seção, e enfeite o olho pula. Encostado, começa na mesma
+           linha vertical em que começa o primeiro azulejo da grade —
+           os dois estão dentro do mesmo .container. */
+        .section-header.filtrada {
+            text-align: left;
+        }
+
+        /* E não vira caixa alta. "ACADEMIAS E ESPORTES" é letreiro de
+           seção; o que a pessoa acabou de clicar chama-se "Academias e
+           Esportes", e é assim que ela quer ver de volta — igual ao que
+           está escrito no azulejo e no menu de busca. */
+        .section-header.filtrada h2,
+        .section-header.filtrada p {
+            text-transform: none;
+        }
+
+        /* A contagem é informação, não legenda: escurece para ser lida
+           junto do nome, e não depois dele. */
+        .section-header.filtrada p {
+            color: #334155;
+        }
+
+        /* Quatro por fileira, duas fileiras: os 8 destaques da home.
+           Antes era "auto-fill" com 320px mínimos, o que dava 3 por
+           fileira no computador e deixava a segunda com um buraco. */
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+
+        @media (max-width: 1024px) {
+            .listings-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 820px) {
+            .listings-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 18px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .listings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .listing-card {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+
+            /* Card em coluna, com o pé empurrado para baixo: numa
+               fileira de quatro lojas, uma com descrição curta e outra
+               com descrição longa, os selos e os botões ficam na mesma
+               altura em vez de subir e descer de card para card. */
+            display: flex;
+            flex-direction: column;
+
+            /* O pé mede a largura do card, e não a da tela: com quatro
+               por fileira o card estreita antes de a grade virar três. */
+            container-type: inline-size;
+        }
+
+        .listing-card > a { flex: 1 1 auto; }
+
+        .listing-card .listing-footer { margin-top: auto; }
+
+        .listing-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .listing-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 230px;
+        }
+
+        .listing-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .badge-cat-icon {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background-color: #22c55e;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .listing-body {
+            padding: 20px;
+        }
+
+        .listing-title {
+            font-size: 1.2rem;
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .listing-category {
+            color: #64748b;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .listing-description {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        /* O pé do card responde, sem abrir a loja, as duas perguntas de
+           quem procura às sete da noite — está aberto? entrega? — e dá
+           os dois caminhos que a pessoa vai querer em seguida: chamar no
+           WhatsApp e ver onde fica.
+
+           Ele fica FORA do <a> que embrulha o card. Link dentro de link
+           o navegador não aceita: ele fecha o primeiro por conta
+           própria, e o card inteiro deixa de abrir a loja. */
+        /* Numa linha só, sempre. Com "Fechado" e "Entrega" juntos, a
+           quebra jogava os botões para baixo e aquele card ficava com o
+           pé mais alto que os vizinhos da fileira. */
+        .listing-footer {
+            border-top: 1px solid #f1f5f9;
+            padding: 12px 12px;
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 5px;
+        }
+
+        .selo {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 7px;
+            border-radius: 999px;
+            font-size: 0.64rem;
+            font-weight: 700;
+            letter-spacing: 0.1px;
+            white-space: nowrap;
+        }
+
+        .selo i { font-size: 0.55rem; }
+
+        .selo-aberto  { background: #dcfce7; color: #15803d; }
+        .selo-fechado { background: #f1f5f9; color: #64748b; }
+
+        /* A entrega puxa o laranja da marca. É o selo que faz alguém
+           parar de rolar a lista, e ele não pode se confundir com o
+           verde de "aberto" logo ao lado. */
+        .selo-entrega {
+            background: #ff6600;
+            color: #ffffff;
+        }
+
+        .selo-entrega i { font-size: 0.78rem; }
+
+        .listing-actions {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        /* Redondos e coloridos: são botões, e precisam parecer botões
+           mesmo no canto de um card. */
+        .listing-actions a {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: transform 0.15s, filter 0.15s;
+        }
+
+        .listing-actions a:hover {
+            transform: scale(1.1);
+            filter: brightness(1.08);
+        }
+
+        /* Card estreito (telas perto de 1024px, ainda com quatro por
+           fileira): "Fechado", "Entrega" e os dois botões só cabem
+           juntos se tudo encolher mais um pouco. */
+        @container (max-width: 250px) {
+            .listing-footer { padding: 12px 8px; gap: 4px; }
+            .selo { padding: 3px 5px; gap: 3px; font-size: 0.58rem; letter-spacing: 0; }
+            .selo i { font-size: 0.5rem; }
+            .selo-entrega i { font-size: 0.68rem; }
+            .listing-actions { gap: 4px; }
+            .listing-actions a { width: 28px; height: 28px; font-size: 0.85rem; }
+        }
+
+        .acao-whats { background: #25d366; }
+        .acao-mapa  { background: #ea4335; }
+
+        /* FOOTER */
+        .main-footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            border-top: 1px solid #1e293b;
+        }
+
+        /* Ações (Entrar / Cadastrar Anúncio) dentro do rodapé — só aparecem no mobile */
+        .footer-actions {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .footer-actions {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .footer-actions .btn-add-listing {
+                padding: 10px 20px;
+                font-size: 0.8rem;
+            }
+        }
+    
+        /* ==========================================================
+           FAIXA DA PROMOÇÃO DE LANÇAMENTO
+           Aparece só enquanto a data de GRATIS_ATE não passou. A
+           regra fica no JavaScript, no fim da página: assim, quando
+           01/10/2026 chegar, a faixa some sozinha e ninguém precisa
+           lembrar de tirar.
+           ========================================================== */
+        .faixa-promocao {
+            background-color: #ff6600;
+            color: #ffffff;
+            text-align: center;
+            padding: 14px 20px;
+            display: none;
+        }
+
+        .faixa-promocao.visivel {
+            display: block;
+        }
+
+        .faixa-promocao .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .faixa-promocao p {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .faixa-promocao p span {
+            font-weight: 400;
+            opacity: 0.92;
+        }
+
+        .faixa-promocao a {
+            background-color: #ffffff;
+            color: #ff6600;
+            padding: 9px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .faixa-promocao a:hover {
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        @media (max-width: 600px) {
+            .faixa-promocao p { font-size: 0.92rem; }
+            .faixa-promocao .container { gap: 12px; }
+        }
+    </style>
+    <!-- Troca a chave de Entrar pelo atalho do painel e mostra o Sair,
+         quando ha sessao aberta. -->
+    <script src="assets/js/sessao.js" defer></script>
+    <!-- Cabecalho e menu sanduiche: um arquivo so para o site inteiro. -->
+    <link rel="stylesheet" href="assets/css/header.css">
+    <script src="assets/js/menu.js" defer></script>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis">
+            </a>
+            
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">INÍCIO</a>
+                <a href="planos.html">PLANOS</a>
+                <a href="sobrenos.html">SOBRE NÓS</a>
+                <a href="fale-conosco.html">FALE CONOSCO</a>
+            </nav>
+
+            <div class="header-actions">
+                <a href="auth/login.html" class="btn-icon-login" title="Entrar"><i class="fa-solid fa-key"></i></a>
+                <a href="planos.html" class="btn-add-listing">+ CADASTRAR ANÚNCIO</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="faixa-promocao" id="faixaPromocao">
+        <div class="container">
+            <p>
+                CADASTRE SUA LOJA GRÁTIS
+                <span>até 30/09/2026 — sem cartão, sem cobrança</span>
+            </p>
+            <!-- Vai direto para o cadastro, e não para os planos: enquanto
+                 a promoção vale não há o que escolher nem o que pagar, e
+                 mostrar uma tabela de preços a quem acabou de ler "grátis"
+                 só faz a pessoa desconfiar e desistir.
+                 Esta faixa some sozinha em 01/10/2026 (a data está em
+                 assets/js/regras.js), e o caminho curto morre com ela. -->
+            <a href="auth/cadastro.html">QUERO ANUNCIAR</a>
+        </div>
+    </section>
+
+    <section class="banner-carousel-section">
+        <div class="banner-wrapper">
+            <div class="banner-slides-container" id="bannerSlides">
+                <div class="banner-slide">
+                    <!-- Ainda sem patrocinador no Buritis: o espaço vende a
+                         si mesmo. Quando entrar o primeiro banner (imagem
+                         2188x718), ele substitui este slide. -->
+                    <a href="https://wa.me/5531999347032?text=Ol%C3%A1!%20Quero%20colocar%20meu%20banner%20no%20Guia%20Comercial%20Buritis%20e%20Regi%C3%A3o."
+                       target="_blank" rel="noopener" class="banner-anuncie">
+                        <span class="banner-anuncie-selo">ESPAÇO DISPONÍVEL</span>
+                        <strong>Sua marca aqui, para todo o Buritis e região</strong>
+                        <span class="banner-anuncie-sub">Buritis · Estoril · Palmeiras · Havaí · Olhos d'Água · Belvedere</span>
+                        <span class="banner-anuncie-btn"><i class="fa-brands fa-whatsapp"></i> QUERO ANUNCIAR AQUI</span>
+                    </a>
+                </div>
+            </div>
+
+            <button class="banner-btn banner-prev" id="bannerPrev"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="banner-btn banner-next" id="bannerNext"><i class="fa-solid fa-chevron-right"></i></button>
+
+            <!-- Uma bolinha por banner. O carrossel conta os slides
+                 sozinho, mas as bolinhas são escritas à mão: esquecer
+                 de acrescentar uma deixa o terceiro banner girando sem
+                 nada que o represente aqui embaixo. -->
+            <div class="banner-dots" id="bannerDots">
+                <span class="banner-dot active" data-index="0"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="hero-section">
+        <div class="container">
+            <h1>Encontre os melhores estabelecimentos do Buritis e região</h1>
+            
+            <div class="search-box-wrapper">
+                <form class="search-form" id="searchForm">
+                    <select name="cidade" id="searchCidade">
+                        <!-- O guia cobre o Buritis e os bairros vizinhos,
+                             todos em Belo Horizonte: a coluna "cidade" do
+                             banco guarda "belo horizonte", e o bairro fica
+                             no endereço. A segunda opção não é escolhível:
+                             está ali para dizer que virá mais. -->
+                        <option value="belo horizonte" selected>Buritis e região - BH</option>
+                        <option value="" disabled>Em breve mais bairros</option>
+                    </select>
+
+                    <select name="categoria" id="searchCategoria">
+                        <option value="">Todas as Categorias</option>
+                        <option value="Academias e Esportes">Academias e Esportes</option>
+                        <option value="Advocacia e Contabilidade">Advocacia e Contabilidade</option>
+                        <option value="Agropecuária">Agropecuária</option>
+                        <option value="Alimentação e Gastronomia">Alimentação e Gastronomia</option>
+                        <option value="Assistência Técnica e Consertos">Assistência Técnica e Consertos</option>
+                        <option value="Automotivo e Peças">Automotivo e Peças</option>
+                        <option value="Bares e Distribuidoras">Bares e Distribuidoras</option>
+                        <option value="Beleza e Estética">Beleza e Estética</option>
+                        <option value="Casa, Construção e Reformas">Casa, Construção e Reformas</option>
+                        <option value="Celular e acessórios">Celular e acessórios</option>
+                        <option value="Clínicas, Médicos e Dentistas">Clínicas, Médicos e Dentistas</option>
+                        <option value="Comércio e Compras">Comércio e Compras</option>
+                        <option value="Cursos e Educação">Cursos e Educação</option>
+                        <option value="Dentista - Dental">Dentista - Dental</option>
+                        <option value="Eventos e Festas">Eventos e Festas</option>
+                        <option value="Farmácias e Saúde">Farmácias e Saúde</option>
+                        <option value="Fretes e Mudanças">Fretes e Mudanças</option>
+                        <option value="Imóveis e Imobiliárias">Imóveis e Imobiliárias</option>
+                        <option value="Lanche, Pizza e outros">Lanche, Pizza e outros</option>
+                        <option value="Limpeza e Manutenção">Limpeza e Manutenção</option>
+                        <option value="Mercados e Hortifruti">Mercados e Hortifruti</option>
+                        <option value="Moda Feminina">Moda Feminina</option>
+                        <option value="Moda Masculina">Moda Masculina</option>
+                        <option value="Moda Unissex">Moda Unissex</option>
+                        <option value="Móveis e Decoração">Móveis e Decoração</option>
+                        <option value="Padarias">Padarias</option>
+                        <option value="Pet Shop e Veterinária">Pet Shop e Veterinária</option>
+                        <option value="Serviços Gerais e Manutenção">Serviços Gerais e Manutenção</option>
+                        <option value="Sorvete, Açaí e Picolé">Sorvete, Açaí e Picolé</option>
+                        <option value="Táxi e Moto Táxi">Táxi e Moto Táxi</option>
+                        <option value="Turismo e Hospedagem">Turismo e Hospedagem</option>
+                        <option value="Web e Tecnologia">Web e Tecnologia</option>
+                    </select>
+
+                    <button type="submit" class="btn-search">BUSCAR</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="categories-container">
+        <div class="container">
+            <div class="categories-grid">
+                <a onclick="filtrarCategoria('Agropecuária')" class="category-card cat-agro">
+                    <i class="fa-solid fa-tractor"></i>
+                    <span>Agropecuária</span>
+                </a>
+                <a onclick="filtrarCategoria('Automotivo e Peças')" class="category-card cat-auto">
+                    <i class="fa-solid fa-car"></i>
+                    <span>Automotivo</span>
+                </a>
+                <a onclick="filtrarCategoria('Beleza e Estética')" class="category-card cat-beleza">
+                    <i class="fa-solid fa-scissors"></i>
+                    <span>Beleza e Estética</span>
+                </a>
+                <a onclick="filtrarCategoria('Casa, Construção e Reformas')" class="category-card cat-casa">
+                    <span class="icones">
+                        <i class="fa-solid fa-trowel-bricks"></i>
+                        <i class="fa-solid fa-couch"></i>
+                    </span>
+                    <span class="rotulo-menor">Casa, Construção e Reformas</span>
+                </a>
+                <a onclick="filtrarCategoria('Farmácias e Saúde')" class="category-card cat-saude">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>Farmácia e Saúde</span>
+                </a>
+                <a onclick="filtrarCategoria('Imóveis e Imobiliárias')" class="category-card cat-imoveis">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Imóveis</span>
+                </a>
+
+                <!-- Três ícones, e não um: o sanduíche e a pizza dizem o
+                     que este azulejo tem de mais procurado, e o espeto é
+                     o "e outros" ganhando cara. -->
+                <a onclick="filtrarCategoria('Lanche, Pizza e outros')" class="category-card cat-gastro">
+                    <span class="icones">
+                        <i class="fa-solid fa-burger"></i>
+                        <i class="fa-solid fa-pizza-slice"></i>
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                            <g transform="rotate(-45 12 12)">
+                                <rect x="1.5" y="11.2" width="21" height="1.6" rx=".8"/>
+                                <rect x="8" y="8" width="4.2" height="8" rx="1.4"/>
+                                <rect x="13.1" y="8" width="4.2" height="8" rx="1.4"/>
+                                <rect x="18.2" y="8" width="4.2" height="8" rx="1.4"/>
+                            </g>
+                        </svg>
+                    </span>
+                    <span>Lanche, Pizzas e outros</span>
+                </a>
+
+                <a onclick="filtrarCategoria('Pet Shop e Veterinária')" class="category-card cat-pet">
+                    <i class="fa-solid fa-dog"></i>
+                    <span>Pet Shop</span>
+                </a>
+                <a onclick="filtrarCategoria('Sorvete, Açaí e Picolé')" class="category-card cat-sorvete">
+                    <i class="fa-solid fa-ice-cream"></i>
+                    <span>Sorvete e Açaí</span>
+                </a>
+                <a onclick="filtrarCategoria('Táxi e Moto Táxi')" class="category-card cat-taxi">
+                    <i class="fa-solid fa-taxi"></i>
+                    <span>Táxi e Moto Táxi</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="listings-section" id="anuncios">
+        <div class="container">
+            <div class="section-header" id="cabecalhoAnuncios">
+                <h2>ANÚNCIOS EM DESTAQUE</h2>
+                <p>Confira os principais estabelecimentos do Buritis e região</p>
+            </div>
+
+            <div class="listings-grid" id="listingsContainer">
+                <p style="text-align: center; color: #64748b; grid-column: 1 / -1;">Carregando anúncios...</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-actions">
+                <a href="auth/login.html" class="btn-icon-login" title="Entrar"><i class="fa-solid fa-key"></i></a>
+                <a href="planos.html" class="btn-add-listing">+ CADASTRAR ANÚNCIO</a>
+            </div>
+            <p>&copy; 2026 Guia Comercial Buritis e Região. Todos os direitos reservados: <a href="https://mesquitasaas.online/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Mesquita SaaS</a>.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Cliente único do Supabase, acessível por TODOS os scripts desta página
+        // (antes ele era criado dentro de um <script type="module">, o que o isolava
+        // e impedia o popup do anúncio de funcionar, pois ele não enxergava essa variável).
+        const SUPABASE_URL = window.CONFIG_SUPABASE.url;
+        const SUPABASE_ANON_KEY = window.CONFIG_SUPABASE.chavePublica;
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ==========================================================
+        // PROMOÇÃO DE LANÇAMENTO
+        // ==========================================================
+        // A data mora em assets/js/regras.js, junto com o limite de
+        // fotos — as duas coisas mudam no mesmo dia, então mudam no
+        // mesmo lugar. Aqui só perguntamos se a promoção ainda vale.
+        //
+        // A faixa some sozinha em 01/10/2026, sem ninguém precisar
+        // lembrar de tirar.
+        if (window.REGRAS.promocaoValendo()) {
+            document.getElementById("faixaPromocao").classList.add("visivel");
+        }
+
+
+
+        // 1. Lógica do Carrossel / Banner Rotativo
+        const slidesContainer = document.getElementById('bannerSlides');
+        const slides = document.querySelectorAll('.banner-slide');
+        const dots = document.querySelectorAll('.banner-dot');
+        const prevBtn = document.getElementById('bannerPrev');
+        const nextBtn = document.getElementById('bannerNext');
+        const bannerWrapper = document.querySelector('.banner-wrapper');
+        
+        let currentIndex = 0;
+        const totalSlides = slides.length;
+
+        // Com um banner só não há para onde girar: setas e bolinha
+        // somem, em vez de ficarem ali sem fazer nada.
+        if (totalSlides < 2) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            document.getElementById('bannerDots').style.display = 'none';
+        }
+
+        function updateSlider() {
+            slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === currentIndex);
+            });
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % totalSlides;
+            updateSlider();
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+            updateSlider();
+        }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                currentIndex = parseInt(e.target.getAttribute('data-index'));
+                updateSlider();
+            });
+        });
+
+        // A altura vem da proporção no CSS, e não de conta em
+        // JavaScript. Uma fonte só evita as duas discordarem no meio de
+        // um redimensionamento.
+
+        // Rotação automática a cada 5 segundos
+        let autoSlide = setInterval(nextSlide, 5000);
+
+        bannerWrapper.addEventListener('mouseenter', () => clearInterval(autoSlide));
+        bannerWrapper.addEventListener('mouseleave', () => autoSlide = setInterval(nextSlide, 5000));
+
+        // 2. Carregamento de Anúncios do Supabase
+        const urlParams = new URLSearchParams(window.location.search);
+        const cidadeUrl = urlParams.get('cidade') || 'belo horizonte';
+        const categoriaUrl = urlParams.get('categoria') || '';
+
+        if(document.getElementById('searchCidade')) document.getElementById('searchCidade').value = cidadeUrl;
+        if(document.getElementById('searchCategoria')) document.getElementById('searchCategoria').value = categoriaUrl;
+
+        // ===== O pé do card =====
+        //
+        // Só entra o que a loja de fato informou. Um selo "Fechado" numa
+        // loja que nunca preencheu horário, ou um botão de mapa que abre
+        // uma busca vazia, valem menos que espaço em branco: ensinam
+        // quem procura a desconfiar do guia inteiro.
+        function montarPeDoCard(anuncio) {
+            const partes = [];
+
+            const aberta = window.LOJA.estaAbertaAgora(anuncio.horarios);
+            if (aberta !== null) {
+                partes.push(aberta
+                    ? '<span class="selo selo-aberto"><i class="fa-solid fa-circle"></i> ABERTO</span>'
+                    : '<span class="selo selo-fechado"><i class="fa-solid fa-circle"></i> FECHADO</span>');
+            }
+
+            if (anuncio.entrega) {
+                partes.push('<span class="selo selo-entrega"><i class="fa-solid fa-motorcycle"></i> ENTREGA</span>');
+            }
+
+            const acoes = [];
+
+            const whats = window.LOJA.linkWhatsapp(anuncio.whatsapp);
+            if (whats) {
+                // O data-anuncio é lido pelo container na hora do clique,
+                // para somar o mesmo contador que a página da loja soma.
+                acoes.push(`<a href="${whats}" target="_blank" rel="noopener"
+                    class="acao-whats" data-anuncio="${anuncio.id}"
+                    title="Chamar no WhatsApp" aria-label="Chamar ${anuncio.titulo} no WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>`);
+            }
+
+            const mapa = window.LOJA.linkMapa(anuncio.endereco, anuncio.cidade);
+            if (mapa) {
+                acoes.push(`<a href="${mapa}" target="_blank" rel="noopener"
+                    class="acao-mapa" title="Ver no Google Maps"
+                    aria-label="Ver ${anuncio.titulo} no Google Maps"><i class="fa-solid fa-location-dot"></i></a>`);
+            }
+
+            if (acoes.length) partes.push(`<div class="listing-actions">${acoes.join('')}</div>`);
+            if (!partes.length) return '';
+
+            return `<div class="listing-footer">${partes.join('')}</div>`;
+        }
+
+        // Um ouvinte só, no container, em vez de um por card: a lista é
+        // remontada a cada busca, e ouvintes presos aos cards antigos
+        // ficariam para trás a cada troca de filtro.
+        document.getElementById('listingsContainer').addEventListener('click', (evento) => {
+            const botao = evento.target.closest('.acao-whats');
+            if (!botao) return;
+
+            // Não segura o link: a soma acontece no banco e a pessoa vai
+            // para o WhatsApp na mesma hora. Se a chamada falhar, o que
+            // se perde é uma contagem, não a conversa com a loja.
+            supabaseClient.rpc('registrar_clique_whatsapp', {
+                p_anuncio: botao.dataset.anuncio
+            }).then(() => {}, () => {});
+        });
+
+        /**
+         * O cabeçalho da listagem, que muda conforme a busca.
+         *
+         * Sem categoria escolhida ele continua sendo o título fixo da
+         * vitrine, centralizado. Com categoria, vira o resultado: o
+         * nome da categoria na frente e, embaixo, quantos anunciantes
+         * ela tem. Quem clicou num azulejo quer saber se achou alguma
+         * coisa, e o título antigo respondia "confira os principais
+         * estabelecimentos do Buritis e região" — que não responde nada.
+         *
+         * `quantidade` vem nula enquanto a busca não voltou, e também
+         * quando ela falha. Nesses dois casos o número não aparece, em
+         * vez de aparecer como zero: zero é uma afirmação, e nenhuma
+         * das duas situações permite afirmar que não há ninguém.
+         */
+        function montarCabecalhoDaListagem(categoriaFiltro, quantidade) {
+            const cabecalho = document.getElementById('cabecalhoAnuncios');
+            const titulo = cabecalho.querySelector('h2');
+            const linha = cabecalho.querySelector('p');
+
+            if (!categoriaFiltro) {
+                cabecalho.classList.remove('filtrada');
+                titulo.textContent = 'ANÚNCIOS EM DESTAQUE';
+                linha.textContent = 'Confira os principais estabelecimentos do Buritis e região';
+                linha.hidden = false;
+                return;
+            }
+
+            // Um endereço pode pedir mais de uma categoria de uma vez
+            // (ver o filtro em carregarAnuncios). Aí o título traz as
+            // duas, separadas do mesmo jeito que o endereço as separa.
+            const nomes = categoriaFiltro.split('|')
+                .map((c) => c.trim())
+                .filter(Boolean);
+
+            cabecalho.classList.add('filtrada');
+            titulo.textContent = nomes.join(' · ');
+
+            if (quantidade === null || quantidade === undefined) {
+                linha.textContent = '';
+                linha.hidden = true;
+                return;
+            }
+
+            linha.textContent = quantidade === 1
+                ? '1 anunciante encontrado'
+                : `${quantidade} anunciantes encontrados`;
+            linha.hidden = false;
+        }
+
+        async function carregarAnuncios(cidadeFiltro, categoriaFiltro) {
+            const container = document.getElementById('listingsContainer');
+            container.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1 / -1;">Buscando estabelecimentos...</p>';
+
+            // O nome da categoria entra já, junto do "buscando".
+            // O número só existe depois da resposta.
+            montarCabecalhoDaListagem(categoriaFiltro, null);
+
+            try {
+                // Sem teto: entram todas as lojas da cidade, quatro por
+                // fileira, quantas fileiras forem precisas. Havia um
+                // limite de 8, e ele deixaria de fora quem se cadastrou
+                // de graça e nunca soube que existia fila.
+                //
+                // Ordem: destacados na frente e, entre iguais, ordem de
+                // cadastro — quem entrou primeiro aparece primeiro.
+                //
+                // O destaque pago (R$ 120 por 15 dias) só muda a ordem:
+                // quem comprou vem na frente, e o banco desliga sozinho
+                // quando os 15 dias acabam.
+                const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+                const montarConsulta = (comVencimento) => {
+                let query = supabaseClient
+                    .from('anuncios')
+                    .select('*')
+                    // Quem o administrador tirou do ar não aparece.
+                    .eq('ativo', true);
+
+                // Nem quem está com o plano vencido ou ainda não pagou.
+                // Para o visitante o banco já esconde esses (013); o
+                // filtro aqui é para o anunciante logado, que o banco
+                // deixa ver a própria loja e que não deve se achar na
+                // vitrine enquanto ela está fora do ar para os outros.
+                // Táxi não vence, e entra pela categoria.
+                if (comVencimento) {
+                    query = query.or(`vence_em.gte.${hoje},categoria.eq."${window.REGRAS.categoriaGratuita}"`);
+                }
+
+                if (cidadeFiltro) {
+                    query = query.eq('cidade', cidadeFiltro.toLowerCase());
+                }
+                if (categoriaFiltro) {
+                    // Um endereço pode pedir mais de uma categoria de
+                    // uma vez, separadas por barra vertical. Barra, e
+                    // não vírgula: três categorias já têm vírgula no
+                    // nome ("Sorvete, Açaí e Picolé"), e elas se
+                    // partiriam no meio.
+                    //
+                    // Nenhum azulejo usa isso hoje. O de Moda usava, e
+                    // saiu da grade. Isto continua de pé porque link já
+                    // compartilhado chega com as três categorias de
+                    // moda no endereço, e tem de continuar abrindo.
+                    const categorias = categoriaFiltro.split('|')
+                        .map((c) => c.trim())
+                        .filter(Boolean);
+
+                    if (categorias.length > 1) {
+                        // Vieram várias de uma vez, e aí elas aparecem
+                        // agrupadas, uma categoria inteira depois da
+                        // outra. Uma lista com todas embaralhadas obriga
+                        // quem procura a ler a etiqueta de cada card
+                        // para separar o que interessa.
+                        query = query.in('categoria', categorias)
+                                     .order('categoria', { ascending: true });
+                    } else {
+                        query = query.eq('categoria', categorias[0]);
+                    }
+                }
+
+                // Estas duas vêm por último de propósito. A ordem em que
+                // se pede é a que vale, então o agrupamento por categoria
+                // acima manda primeiro; dentro de cada grupo é que valem
+                // o destaque e a ordem de cadastro. Sem filtro, ou com uma
+                // categoria só, elas continuam sendo as únicas.
+                query = query
+                    .order('destaque', { ascending: false })
+                    .order('criado_em', { ascending: true });
+
+                return query;
+                };
+
+                // Enquanto o banco não tiver a coluna vence_em (antes de
+                // rodar o 013-pagamento.sql), a consulta com o filtro de
+                // vencimento dá erro. Aí vai sem ele: a vitrine não pode
+                // ficar vazia por causa da ordem em que as coisas sobem.
+                let { data, error } = await montarConsulta(true);
+                if (error && /vence_em/.test(error.message || '')) {
+                    ({ data, error } = await montarConsulta(false));
+                }
+
+                if (error) throw error;
+
+                montarCabecalhoDaListagem(categoriaFiltro, data ? data.length : 0);
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1 / -1; padding: 40px 0;">Nenhum anúncio encontrado para esta busca.</p>';
+                    return;
+                }
+
+                container.innerHTML = ''; 
+                data.forEach(anuncio => {
+                    const card = document.createElement('div');
+                    card.className = 'listing-card';
+                    // Onde o card do anúncio é construído, adicione a tag <a> ao redor ou no container:
+card.innerHTML = `
+    <a href="anuncio-detalhes.html?id=${anuncio.id}" style="cursor: pointer; text-decoration: none; color: inherit; display: block;">
+        <div class="listing-image-wrapper">
+            <img src="${anuncio.imagem_url}" class="listing-img" alt="${anuncio.titulo}">
+        </div>
+        <div class="listing-body">
+            <h3 class="listing-title">${anuncio.titulo}</h3>
+            <p class="listing-category"><i class="fa-solid fa-tag"></i> ${anuncio.categoria}</p>
+            <p class="listing-description">${anuncio.descricao ? anuncio.descricao.substring(0, 90) + '...' : ''}</p>
+        </div>
+    </a>
+    ${montarPeDoCard(anuncio)}
+`;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error('Erro ao carregar anúncios:', err.message);
+                montarCabecalhoDaListagem(categoriaFiltro, null);
+                container.innerHTML = '<p style="text-align: center; color: #ef4444; grid-column: 1 / -1;">Erro ao conectar com o banco de dados.</p>';
+            }
+        }
+
+        carregarAnuncios(cidadeUrl, categoriaUrl);
+
+        document.getElementById('searchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const cidade = document.getElementById('searchCidade').value;
+            const categoria = document.getElementById('searchCategoria').value;
+            window.location.href = `index.html?cidade=${encodeURIComponent(cidade)}&categoria=${encodeURIComponent(categoria)}#anuncios`;
+        });
+    </script>
+
+    <script>
+        function filtrarCategoria(nomeCategoria) {
+            const selectCidade = document.getElementById('searchCidade');
+            let cidade = (selectCidade && selectCidade.value) ? selectCidade.value : 'belo horizonte';
+            window.location.href = `index.html?cidade=${encodeURIComponent(cidade)}&categoria=${encodeURIComponent(nomeCategoria)}#anuncios`;
+        }
+    </script>
+
+</body>
+</html>

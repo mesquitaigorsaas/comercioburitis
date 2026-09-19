@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Detalhes do Anúncio - Guia Comercial</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #333333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* TOPO DA PÁGINA */
+        .listing-header-banner {
+            background-color: #1e293b;
+            color: #ffffff;
+            padding: 35px 0;
+        }
+
+        .store-identity {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .store-logo-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 3px solid #ffffff;
+            background-color: #ffffff;
+        }
+
+        .store-title-info h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .store-title-info p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr;
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        @media (max-width: 850px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        /* GALERIA E CARTÕES ESQUERDOS */
+        .gallery-card, .info-card {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 25px;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background-color: #000000;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .slide-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 23, 42, 0.7);
+            color: #ffffff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-btn:hover { background: #e11d48; }
+        .slide-btn.prev { left: 15px; }
+        .slide-btn.next { right: 15px; }
+
+        .thumbs-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .thumb-item {
+            width: 80px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.6;
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .thumb-item.active, .thumb-item:hover {
+            opacity: 1;
+            border-color: #2563eb;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .desc-text {
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+
+        /* BARRA LATERAL DIREITA */
+        .sidebar-card {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .section-block {
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .section-block:last-child {
+            margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+        }
+
+        .sidebar-heading {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cat-badge {
+            display: inline-block;
+            background-color: #e11d48;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .btn-whatsapp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: #22c55e;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .contact-links { list-style: none; }
+        .contact-links li {
+            padding: 6px 0;
+            font-size: 0.9rem;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .status-pill.open { background-color: #22c55e; color: white; }
+        .status-pill.closed { background-color: #ef4444; color: white; }
+
+        .schedule-table {
+            width: 100%;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .schedule-table td { padding: 4px 0; }
+
+        .map-frame {
+            width: 100%;
+            height: 220px;
+            border: none;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .main-footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            padding: 25px 0;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+    </style>
+    <script src="assets/js/regras.js"></script>
+    <script src="assets/js/menu-promocao.js"></script>
+    <script src="assets/js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Troca a chave de Entrar pelo atalho do painel e mostra o Sair,
+         quando ha sessao aberta. -->
+    <script src="assets/js/sessao.js" defer></script>
+    <!-- Cabecalho e menu sanduiche: um arquivo so para o site inteiro. -->
+    <link rel="stylesheet" href="assets/css/header.css">
+    <script src="assets/js/menu.js" defer></script>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis">
+            </a>
+            
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">INÍCIO</a>
+                <a href="planos.html">PLANOS</a>
+                <a href="sobrenos.html">SOBRE NÓS</a>
+                <a href="fale-conosco.html">FALE CONOSCO</a>
+            </nav>
+
+            <div class="header-actions">
+                <a href="auth/login.html" class="btn-icon-login"><i class="fa-solid fa-key"></i></a>
+                <a href="planos.html" class="btn-add-listing">+ CADASTRAR ANÚNCIO</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="listing-header-banner">
+        <div class="container">
+            <div class="store-identity">
+                <img id="displayLogo" src="https://via.placeholder.com/80?text=LOGO" class="store-logo-img" alt="Logo da Empresa">
+                <div class="store-title-info">
+                    <h1 id="displayNomeEmpresa">Nome da Empresa</h1>
+                    <p><i class="fa-solid fa-location-dot"></i> <span id="displayCidadeTopo">Belo Horizonte, MG</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="content-grid">
+            
+            <div>
+                <div class="gallery-card">
+                    <div class="slider-wrapper">
+                        <button class="slide-btn prev" onclick="mudarFoto(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <img id="mainImage" src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800" alt="Foto da Empresa">
+                        <button class="slide-btn next" onclick="mudarFoto(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+
+                    <div class="thumbs-container" id="thumbsContainer"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="card-title">
+                        <i class="fa-solid fa-circle-info" style="color: #2563eb;"></i> Sobre a Empresa
+                    </div>
+                    <p class="desc-text" id="displayDescricao">Descrição da empresa cadastrada pelo anunciante...</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="sidebar-card">
+                    
+                    <div class="section-block">
+                        <div class="sidebar-heading"><i class="fa-solid fa-tag"></i> Categoria</div>
+                        <span class="cat-badge" id="displayCategoria">Serviços</span>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="sidebar-heading"><i class="fa-solid fa-address-book"></i> Contato</div>
+                        
+                        <a id="linkWhatsapp" href="#" target="_blank" class="btn-whatsapp">
+                            <i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp
+                        </a>
+
+                        <ul class="contact-links">
+                            <li><i class="fa-solid fa-phone" style="color: #2563eb;"></i> <span id="displayTelefone">(31) 99999-9999</span></li>
+                            <li id="itemInstagram"><i class="fa-brands fa-instagram" style="color: #e11d48;"></i> <a id="linkInstagram" href="#" target="_blank" style="color: #2563eb; text-decoration: none;">Instagram</a></li>
+                            <li id="itemWebsite"><i class="fa-solid fa-globe" style="color: #2563eb;"></i> <a id="linkWebsite" href="#" target="_blank" style="color: #2563eb; text-decoration: none;">Visitar Website</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="sidebar-heading"><i class="fa-solid fa-clock"></i> Horário de Funcionamento</div>
+                        
+                        <div id="statusBadgeContainer">
+                            <span class="status-pill open"><i class="fa-solid fa-circle"></i> ABERTO AGORA</span>
+                        </div>
+                        
+                        <table class="schedule-table">
+                            <tr><td>Domingo:</td><td align="right"><b id="h_domingo">Fechado</b></td></tr>
+                            <tr><td>Segunda-feira:</td><td align="right"><b id="h_segunda">08:00 - 18:00</b></td></tr>
+                            <tr><td>Terça-feira:</td><td align="right"><b id="h_terca">08:00 - 18:00</b></td></tr>
+                            <tr><td>Quarta-feira:</td><td align="right"><b id="h_quarta">08:00 - 18:00</b></td></tr>
+                            <tr><td>Quinta-feira:</td><td align="right"><b id="h_quinta">08:00 - 18:00</b></td></tr>
+                            <tr><td>Sexta-feira:</td><td align="right"><b id="h_sexta">08:00 - 18:00</b></td></tr>
+                            <tr><td>Sábado:</td><td align="right"><b id="h_sabado">08:00 - 12:00</b></td></tr>
+                        </table>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="sidebar-heading"><i class="fa-solid fa-location-dot"></i> Endereço Completo</div>
+                        <p style="font-size: 0.9rem; color: #334155;" id="displayEnderecoCompleto">Av. Professor Mário Werneck, 1000 - Buritis, Belo Horizonte - MG</p>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="sidebar-heading"><i class="fa-solid fa-map-location-dot"></i> Localização no Mapa</div>
+                        <iframe id="googleMapIframe" class="map-frame" loading="lazy" allowfullscreen src=""></iframe>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2026 Guia Comercial Buritis e Região. Todos os direitos reservados: <a href="https://mesquitasaas.online/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Mesquita SaaS</a>.</p>
+        </div>
+    </footer>
+
+    <script>
+        let galeriaFotos = [];
+        let fotoAtualIndex = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dadosSalvos = localStorage.getItem('meuAnuncioReal');
+
+            if (dadosSalvos) {
+                const anuncio = JSON.parse(dadosSalvos);
+
+                document.getElementById('pageTitle').innerText = anuncio.nomeEmpresa + ' - Guia Comercial';
+                document.getElementById('displayNomeEmpresa').innerText = anuncio.nomeEmpresa;
+                document.getElementById('displayCidadeTopo').innerText = anuncio.cidade + ', MG';
+                document.getElementById('displayCategoria').innerText = anuncio.categoria;
+                document.getElementById('displayDescricao').innerText = anuncio.descricao;
+                
+                if (anuncio.logoUrl) {
+                    document.getElementById('displayLogo').src = anuncio.logoUrl;
+                }
+
+                // Galeria
+                if (anuncio.galeriaFotos && anuncio.galeriaFotos.length > 0) {
+                    galeriaFotos = anuncio.galeriaFotos;
+                } else {
+                    galeriaFotos = ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800'];
+                }
+                renderizarGaleria();
+
+                // Contatos
+                document.getElementById('displayTelefone').innerText = anuncio.whatsapp;
+                const numWhats = anuncio.whatsapp.replace(/\D/g, '');
+                document.getElementById('linkWhatsapp').href = `https://wa.me/55${numWhats}`;
+
+                if (anuncio.instagram) {
+                    document.getElementById('linkInstagram').href = anuncio.instagram;
+                } else {
+                    document.getElementById('itemInstagram').style.display = 'none';
+                }
+
+                if (anuncio.website) {
+                    document.getElementById('linkWebsite').href = anuncio.website;
+                } else {
+                    document.getElementById('itemWebsite').style.display = 'none';
+                }
+
+                // Horários Google Meu Negócio
+                if (anuncio.horariosGmb) {
+                    const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+                    dias.forEach(d => {
+                        const elem = document.getElementById(`h_${d}`);
+                        if (elem && anuncio.horariosGmb[d]) {
+                            elem.innerText = anuncio.horariosGmb[d].texto;
+                        }
+                    });
+                }
+
+                // Endereço e Mapa (CORRIGIDO)
+                const endComp = `${anuncio.endereco}, ${anuncio.cidade} - MG`;
+                document.getElementById('displayEnderecoCompleto').innerText = endComp;
+
+                const enderecoEncoded = encodeURIComponent(endComp);
+                document.getElementById('googleMapIframe').src = `https://maps.google.com/maps?q=${enderecoEncoded}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+            }
+        });
+
+        function renderizarGaleria() {
+            const mainImg = document.getElementById('mainImage');
+            const thumbsContainer = document.getElementById('thumbsContainer');
+
+            mainImg.src = galeriaFotos[fotoAtualIndex];
+            thumbsContainer.innerHTML = '';
+
+            galeriaFotos.forEach((foto, index) => {
+                const imgThumb = document.createElement('img');
+                imgThumb.src = foto;
+                imgThumb.className = `thumb-item ${index === fotoAtualIndex ? 'active' : ''}`;
+                imgThumb.onclick = function() {
+                    fotoAtualIndex = index;
+                    renderizarGaleria();
+                };
+                thumbsContainer.appendChild(imgThumb);
+            });
+        }
+
+        function mudarFoto(direcao) {
+            fotoAtualIndex += direcao;
+            if (fotoAtualIndex < 0) {
+                fotoAtualIndex = galeriaFotos.length - 1;
+            } else if (fotoAtualIndex >= galeriaFotos.length) {
+                fotoAtualIndex = 0;
+            }
+            renderizarGaleria();
+        }
+    </script>
+</body>
+</html>

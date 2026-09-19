@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta - Guia Comercial Buritis</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="../assets/css/style.css">
+
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .auth-container {
+            max-width: 480px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f1f5f9;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            background: #ffffff;
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            cursor: default;
+        }
+
+        .auth-body {
+            padding: 30px 25px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .input-with-icon input,
+        .input-with-icon select {
+            width: 100%;
+            padding: 12px 14px 12px 40px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-with-icon input:focus,
+        .input-with-icon select:focus {
+            border-color: #2563eb;
+        }
+
+        /* Campo reprovado na conferência: a borda vermelha aparece assim
+           que a pessoa sai do campo, não só quando ela tenta enviar. */
+        .input-with-icon input.invalido {
+            border-color: #dc2626;
+        }
+
+        /* Recado curto embaixo de um campo — explica por que pedimos
+           aquele dado, ou avisa o que está errado nele. */
+        .aviso-campo {
+            font-size: 12.5px;
+            color: #64748b;
+            line-height: 1.45;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .aviso-campo i {
+            margin-top: 2px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .aviso-campo.erro,
+        .aviso-campo.erro i {
+            color: #dc2626;
+        }
+
+        /* Dois campos lado a lado (CEP + Número, Cidade + Estado).
+           No celular voltam a ficar um embaixo do outro. */
+        .form-linha {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 520px) {
+            .form-linha {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Olhinho para mostrar/esconder a senha. Fica dentro do campo,
+           à direita, e o input ganha uma folga para o texto não passar
+           por baixo dele. */
+        /* Tamanho fixo em vez de padding: o botão encolhia até 20px de
+           largura e o desenho do olho transbordava por cima da borda
+           direita do campo. Com medida própria e o conteúdo centrado,
+           ele para onde deve, com folga da linha. Os 32px também dão
+           um alvo de toque decente no celular. */
+        .btn-olho {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .btn-olho:hover {
+            color: #475569;
+        }
+
+        .input-with-icon input.com-olho {
+            padding-right: 44px;
+        }
+
+        /* Separador entre "quem é você" e "onde você está" — sem isto o
+           formulário vira uma coluna de dez campos sem respiro. */
+        /* A caixa da categoria de táxi. Fica em cima de uma linha
+           divisória, como as seções, porque é uma pergunta à parte e
+           não mais um campo do endereço. */
+        .opcao-taxi {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            cursor: pointer;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 18px;
+            margin-top: 6px;
+        }
+
+        .opcao-taxi span {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: 0.2px;
+        }
+
+        .opcao-taxi input {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+
+        .form-secao {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 16px;
+            margin-top: 2px;
+        }
+
+        .btn-submit {
+            background: #2563eb;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #1d4ed8;
+        }
+
+        .auth-header-text {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .auth-header-text h2 {
+            font-size: 22px;
+            color: #1e293b;
+        }
+
+        .auth-header-text p {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .plano-badge {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+        .plano-badge.show { display: flex; }
+
+        .auth-alert {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0 25px;
+            margin-top: 20px;
+        }
+        .auth-alert.show { display: flex; }
+        .auth-alert.error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .auth-alert.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .forgot-link {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="../index.html" class="logo">
+                <img src="../assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis" style="max-height: 60px; width: auto;">
+            </a>
+
+            <nav class="nav-links">
+                <a href="../index.html"><i class="fa-solid fa-arrow-left"></i> Voltar ao site</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="auth-container">
+        <div class="auth-card">
+
+            <div class="auth-tabs">
+                <button type="button" class="tab-btn">Criar Conta</button>
+            </div>
+
+            <div id="authAlert" class="auth-alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="authAlertText"></span>
+            </div>
+
+            <div class="auth-body">
+
+                <div id="planoBadge" class="plano-badge">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span id="planoBadgeText"></span>
+                </div>
+
+                <form id="form-register" class="auth-form">
+                    <div class="auth-header-text">
+                        <h2>Crie sua conta</h2>
+                        <p>Cadastre-se para publicar e divulgar sua empresa.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-name">Nome Completo *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-user"></i>
+                            <input type="text" id="reg-name" placeholder="Seu nome completo" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-doc">CPF ou CNPJ</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-id-card"></i>
+                            <input type="text" id="reg-doc" placeholder="Opcional" inputmode="numeric">
+                        </div>
+                        <p class="aviso-campo" id="avisoDoc">
+                            <i class="fa-solid fa-lock"></i>
+                            <span>Opcional. Serve só para identificar o responsável pela loja quando houver cobrança. <strong>Não aparece no seu anúncio</strong> e nunca é mostrado a quem visita o site.</span>
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-phone">WhatsApp / Telefone *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <input type="tel" id="reg-phone" placeholder="(31) 99999-9999" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-email">E-mail Comercial *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="reg-email" placeholder="seuemail@empresa.com" required>
+                        </div>
+                    </div>
+
+                    <p class="form-secao">Endereço do responsável</p>
+
+                    <div class="form-linha">
+                        <div class="form-group">
+                            <label for="reg-cep">CEP *</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <input type="text" id="reg-cep" placeholder="37130-000" inputmode="numeric" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-numero">Número *</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-hashtag"></i>
+                                <input type="text" id="reg-numero" placeholder="62" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="aviso-campo" id="avisoCep">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Digite o CEP e o restante do endereço se preenche sozinho.</span>
+                    </p>
+
+                    <div class="form-group">
+                        <label for="reg-logradouro">Endereço *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-road"></i>
+                            <input type="text" id="reg-logradouro" placeholder="Rua, avenida ou praça" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-complemento">Complemento</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-door-open"></i>
+                            <input type="text" id="reg-complemento" placeholder="Sala, apto, fundos (opcional)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-bairro">Bairro *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-map"></i>
+                            <input type="text" id="reg-bairro" placeholder="Buritis" required>
+                        </div>
+                    </div>
+
+                    <div class="form-linha">
+                        <div class="form-group">
+                            <label for="reg-cidade">Cidade *</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-city"></i>
+                                <input type="text" id="reg-cidade" placeholder="Belo Horizonte" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reg-uf">Estado *</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-flag"></i>
+                                <input type="text" id="reg-uf" placeholder="MG" maxlength="2" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Táxi e moto táxi têm cadastro próprio: mais
+                         curto, e sem cobrança nenhuma. A caixa fica no
+                         fim porque é exceção — quem não é taxista passa
+                         reto sem precisar entender o que ela significa. -->
+                    <label class="opcao-taxi" for="reg-taxi">
+                        <span>SOU DA CATEGORIA TÁXI / MOTO TÁXI</span>
+                        <input type="checkbox" id="reg-taxi">
+                    </label>
+
+                    <p class="form-secao">Acesso</p>
+
+                    <div class="form-group">
+                        <label for="reg-password">Crie uma Senha *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="reg-password" class="com-olho" placeholder="Mínimo de 6 caracteres" required minlength="6">
+                            <button type="button" class="btn-olho" data-olho="reg-password" aria-label="Mostrar senha">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-password2">Repita a Senha *</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="reg-password2" class="com-olho" placeholder="Digite a mesma senha" required minlength="6">
+                            <button type="button" class="btn-olho" data-olho="reg-password2" aria-label="Mostrar senha">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <p class="aviso-campo" id="avisoSenha" style="display: none;"></p>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fa-solid fa-rocket"></i> CRIAR CONTA E ANUNCIAR
+                    </button>
+
+                    <p style="text-align: center; font-size: 13px; color: #64748b; margin-top: 8px;">
+                        Já tem conta? <a href="login.html" class="forgot-link">Acessar conta</a>
+                        &nbsp;·&nbsp;
+                        <a href="recuperar-senha.html" class="forgot-link">Esqueci a senha</a>
+                    </p>
+                </form>
+
+                <!-- Aparece no lugar do formulário depois que a conta é
+                     criada, quando o projeto exige confirmação por
+                     e-mail. Antes, esta aba ficava parada com o
+                     formulário preenchido, parecendo travada, enquanto a
+                     pessoa confirmava em outra janela. -->
+                <div id="telaConfirmarEmail" style="display: none; text-align: center; padding: 10px 0 6px;">
+                    <div style="font-size: 40px; color: #2563eb; margin-bottom: 14px;">
+                        <i class="fa-solid fa-envelope-circle-check"></i>
+                    </div>
+
+                    <h2 style="font-size: 20px; color: #0f172a; margin-bottom: 10px;">Confirme seu e-mail</h2>
+
+                    <p style="font-size: 14.5px; color: #475569; line-height: 1.6;">
+                        Enviamos um link de confirmação para<br>
+                        <strong id="emailConfirmacao" style="color: #0f172a;"></strong>
+                    </p>
+
+                    <p style="font-size: 13.5px; color: #64748b; line-height: 1.6; margin-top: 14px;">
+                        Abra seu e-mail e clique no link. <strong>Pode deixar esta aba aberta</strong> —
+                        assim que você confirmar, ela segue sozinha para o cadastro da sua loja.
+                    </p>
+
+                    <p class="aviso-campo" id="statusConfirmacao" style="justify-content: center; margin-top: 20px;">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <span>Aguardando a confirmação...</span>
+                    </p>
+
+                    <p style="font-size: 13px; color: #64748b; margin-top: 22px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                        Não chegou? Confira a caixa de spam ou
+                        <a href="#" id="linkReenviar" class="forgot-link">envie o link de novo</a>.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2026 Guia Comercial Buritis e Região. Todos os direitos reservados: <a href="https://mesquitasaas.online/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Mesquita SaaS</a>.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Cliente Supabase (mesmo projeto usado no restante do site)
+        const SUPABASE_URL = window.CONFIG_SUPABASE.url;
+        const SUPABASE_ANON_KEY = window.CONFIG_SUPABASE.chavePublica;
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Pega o plano escolhido em planos.html (?plano=trimestral / semestral / anual / especial)
+        const urlParams = new URLSearchParams(window.location.search);
+        const planoEscolhido = urlParams.get('plano') || urlParams.get('add') || '';
+
+        const nomesPlanos = {
+            trimestral: 'Plano Trimestral',
+            semestral: 'Plano Semestral',
+            anual: 'Plano Anual',
+            especial: 'Destaque Especial (15 dias)'
+        };
+
+        if (planoEscolhido) {
+            const badge = document.getElementById('planoBadge');
+            const badgeText = document.getElementById('planoBadgeText');
+            badgeText.textContent = 'Plano selecionado: ' + (nomesPlanos[planoEscolhido] || planoEscolhido);
+            badge.classList.add('show');
+        }
+
+        function showAlert(type, message) {
+            const box = document.getElementById('authAlert');
+            const text = document.getElementById('authAlertText');
+            const icon = box.querySelector('i');
+            box.classList.remove('error', 'success');
+            box.classList.add(type, 'show');
+            icon.className = type === 'success' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation';
+            text.textContent = message;
+        }
+
+        function hideAlert() {
+            document.getElementById('authAlert').classList.remove('show');
+        }
+
+        function setLoading(button, loading, loadingText) {
+            if (loading) {
+                button.dataset.originalHtml = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${loadingText}`;
+            } else {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalHtml;
+            }
+        }
+
+        // =============================================================
+        // CPF E CNPJ
+        //
+        // Os dois últimos dígitos são o resultado de uma conta feita
+        // com os anteriores. É por isso que 111.111.111-11 é recusado:
+        // ele tem onze dígitos, mas não fecha a conta de ninguém.
+        //
+        // A mesma conferência existe dentro do banco (documento_valido,
+        // em supabase/perfis.sql). Esta aqui é só para avisar na hora,
+        // enquanto a pessoa ainda está com o campo à frente.
+        // =============================================================
+        const soNumeros = (valor) => (valor || '').replace(/\D/g, '');
+
+        function cpfValido(d) {
+            if (d.length !== 11 || /^(\d)\1+$/.test(d)) return false;
+
+            for (const [ate, peso] of [[9, 10], [10, 11]]) {
+                let soma = 0;
+                for (let i = 0; i < ate; i++) soma += Number(d[i]) * (peso - i);
+                let resto = (soma * 10) % 11;
+                if (resto === 10) resto = 0;
+                if (resto !== Number(d[ate])) return false;
+            }
+            return true;
+        }
+
+        function cnpjValido(d) {
+            if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+
+            // Os pesos descem até 2 e então voltam para 9.
+            for (const [ate, inicio] of [[12, 5], [13, 6]]) {
+                let soma = 0;
+                let peso = inicio;
+                for (let i = 0; i < ate; i++) {
+                    soma += Number(d[i]) * peso;
+                    peso = peso === 2 ? 9 : peso - 1;
+                }
+                const resto = soma % 11;
+                const digito = resto < 2 ? 0 : 11 - resto;
+                if (digito !== Number(d[ate])) return false;
+            }
+            return true;
+        }
+
+        const documentoValido = (d) => (d.length === 11 ? cpfValido(d) : cnpjValido(d));
+
+        // Coloca ponto, traço e barra conforme a pessoa digita. Até 11
+        // dígitos escreve como CPF; daí em diante, como CNPJ.
+        function formatarDocumento(valor) {
+            const d = soNumeros(valor).slice(0, 14);
+
+            if (d.length <= 11) {
+                return d
+                    .replace(/^(\d{3})(\d)/, '$1.$2')
+                    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+                    .replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2');
+            }
+            return d
+                .replace(/^(\d{2})(\d)/, '$1.$2')
+                .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+                .replace(/\.(\d{3})(\d{4})/, '.$1/$2')
+                .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+        }
+
+        const campoDoc = document.getElementById('reg-doc');
+        const avisoDoc = document.getElementById('avisoDoc');
+        const avisoDocOriginal = avisoDoc.innerHTML;
+
+        campoDoc.addEventListener('input', () => {
+            campoDoc.value = formatarDocumento(campoDoc.value);
+
+            // Enquanto corrige, o campo volta ao normal: manter o
+            // vermelho enquanto a pessoa digita é só barulho.
+            campoDoc.classList.remove('invalido');
+            avisoDoc.classList.remove('erro');
+            avisoDoc.innerHTML = avisoDocOriginal;
+        });
+
+        // A conferência só acontece ao sair do campo. Reclamar no meio
+        // da digitação acusaria todo CPF de errado até o último dígito.
+        campoDoc.addEventListener('blur', () => {
+            const d = soNumeros(campoDoc.value);
+            if (!d) return;
+
+            if (!documentoValido(d)) {
+                campoDoc.classList.add('invalido');
+                avisoDoc.classList.add('erro');
+                avisoDoc.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>Confira este número: ele não é um ' +
+                    (d.length > 11 ? 'CNPJ' : 'CPF') + ' válido.</span>';
+            }
+        });
+
+        // =============================================================
+        // CEP: preenche o endereço sozinho
+        //
+        // Consulta o ViaCEP, um serviço público e gratuito. Se ele
+        // estiver fora do ar ou o CEP não existir, nada trava: os
+        // campos continuam lá para serem digitados na mão.
+        // =============================================================
+        const campoCep = document.getElementById('reg-cep');
+        const avisoCep = document.getElementById('avisoCep');
+        const avisoCepOriginal = avisoCep.innerHTML;
+
+        function recadoCep(texto, erro, icone) {
+            avisoCep.classList.toggle('erro', erro);
+            avisoCep.innerHTML = `<i class="fa-solid ${icone}"></i><span>${texto}</span>`;
+        }
+
+        campoCep.addEventListener('input', () => {
+            const d = soNumeros(campoCep.value).slice(0, 8);
+            campoCep.value = d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+        });
+
+        campoCep.addEventListener('blur', async () => {
+            const cep = soNumeros(campoCep.value);
+
+            if (!cep) {
+                avisoCep.classList.remove('erro');
+                avisoCep.innerHTML = avisoCepOriginal;
+                return;
+            }
+
+            if (cep.length !== 8) {
+                recadoCep('O CEP tem 8 números.', true, 'fa-circle-exclamation');
+                return;
+            }
+
+            recadoCep('Buscando endereço...', false, 'fa-spinner fa-spin');
+
+            try {
+                const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const endereco = await resposta.json();
+
+                if (endereco.erro) {
+                    recadoCep('CEP não encontrado. Preencha o endereço à mão.', true, 'fa-circle-exclamation');
+                    return;
+                }
+
+                // Só preenche o que estiver vazio: se a pessoa já
+                // corrigiu algum campo, não passamos por cima.
+                const preencher = (id, valor) => {
+                    const campo = document.getElementById(id);
+                    if (valor && !campo.value.trim()) campo.value = valor;
+                };
+
+                preencher('reg-logradouro', endereco.logradouro);
+                preencher('reg-bairro', endereco.bairro);
+                preencher('reg-cidade', endereco.localidade);
+                preencher('reg-uf', endereco.uf);
+
+                recadoCep('Endereço encontrado. Confira e complete o número.', false, 'fa-circle-check');
+                document.getElementById('reg-numero').focus();
+            } catch {
+                recadoCep('Não deu para buscar o CEP agora. Preencha o endereço à mão.', true, 'fa-circle-exclamation');
+            }
+        });
+
+        // =============================================================
+        // SENHA
+        // =============================================================
+        // Olhinho: mostra e esconde o que foi digitado. Numa senha que
+        // a pessoa está criando agora — e que precisa repetir logo
+        // abaixo — poder conferir o que digitou evita metade dos erros.
+        document.querySelectorAll('.btn-olho').forEach((botao) => {
+            botao.addEventListener('click', () => {
+                const campo = document.getElementById(botao.dataset.olho);
+                const escondida = campo.type === 'password';
+
+                campo.type = escondida ? 'text' : 'password';
+                botao.querySelector('i').className = escondida ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+                botao.setAttribute('aria-label', escondida ? 'Esconder senha' : 'Mostrar senha');
+            });
+        });
+
+        const campoSenha = document.getElementById('reg-password');
+        const campoSenha2 = document.getElementById('reg-password2');
+        const avisoSenha = document.getElementById('avisoSenha');
+
+        // Avisa na hora que as duas param de bater, em vez de só na
+        // tentativa de enviar.
+        function conferirSenhas() {
+            if (!campoSenha2.value) {
+                avisoSenha.style.display = 'none';
+                campoSenha2.classList.remove('invalido');
+                return;
+            }
+
+            const iguais = campoSenha.value === campoSenha2.value;
+
+            avisoSenha.style.display = 'flex';
+            avisoSenha.classList.toggle('erro', !iguais);
+            campoSenha2.classList.toggle('invalido', !iguais);
+            avisoSenha.innerHTML = iguais
+                ? '<i class="fa-solid fa-circle-check"></i><span>As senhas conferem.</span>'
+                : '<i class="fa-solid fa-circle-exclamation"></i><span>As duas senhas estão diferentes.</span>';
+        }
+
+        campoSenha.addEventListener('input', conferirSenhas);
+        campoSenha2.addEventListener('input', conferirSenhas);
+
+        // =============================================================
+        // ESPERANDO A CONFIRMAÇÃO DO E-MAIL
+        // =============================================================
+        // Quem confirma abre o link numa aba nova. Esta aba aqui, a que
+        // preencheu o formulário, ficava para trás sem saber de nada.
+        //
+        // Agora ela fica de olho: as duas abas são do mesmo site, então
+        // a sessão criada lá aparece no armazenamento daqui também.
+        // Quando aparecer, esta aba segue sozinha para o cadastro da
+        // loja — a pessoa continua em qualquer uma das duas.
+        function esperarConfirmacao(email, proximaUrl) {
+            document.getElementById('form-register').style.display = 'none';
+            document.getElementById('telaConfirmarEmail').style.display = 'block';
+            document.getElementById('emailConfirmacao').textContent = email;
+            hideAlert();
+
+            let jaSeguiu = false;
+
+            function seguir() {
+                if (jaSeguiu) return;
+                jaSeguiu = true;
+
+                document.getElementById('statusConfirmacao').innerHTML =
+                    '<i class="fa-solid fa-circle-check"></i><span>Confirmado! Levando você para o cadastro da loja...</span>';
+
+                setTimeout(() => { window.location.href = proximaUrl; }, 1200);
+            }
+
+            // Caminho rápido: a própria biblioteca avisa quando a
+            // sessão aparece.
+            supabaseClient.auth.onAuthStateChange((_evento, sessao) => {
+                if (sessao) seguir();
+            });
+
+            // Rede de segurança: nem todo navegador avisa entre abas.
+            // De três em três segundos, pergunta se já entrou.
+            const relogio = setInterval(async () => {
+                const { data } = await supabaseClient.auth.getSession();
+                if (data.session) {
+                    clearInterval(relogio);
+                    seguir();
+                }
+            }, 3000);
+
+            // Reenviar o link, para quem não recebeu.
+            document.getElementById('linkReenviar').addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                const status = document.getElementById('statusConfirmacao');
+                status.classList.remove('erro');
+                status.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Enviando de novo...</span>';
+
+                const { error } = await supabaseClient.auth.resend({ type: 'signup', email });
+
+                status.classList.toggle('erro', Boolean(error));
+                status.innerHTML = error
+                    ? '<i class="fa-solid fa-circle-exclamation"></i><span>Não deu para reenviar agora. Tente daqui a pouco.</span>'
+                    : '<i class="fa-solid fa-paper-plane"></i><span>Link reenviado. Confira seu e-mail.</span>';
+            });
+        }
+
+        // ===== CRIAR CONTA =====
+        document.getElementById('form-register').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+
+            const nome = document.getElementById('reg-name').value.trim();
+            const documento = soNumeros(document.getElementById('reg-doc').value);
+            const telefone = document.getElementById('reg-phone').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const password2 = document.getElementById('reg-password2').value;
+            const cep = soNumeros(document.getElementById('reg-cep').value);
+            const logradouro = document.getElementById('reg-logradouro').value.trim();
+            const numero = document.getElementById('reg-numero').value.trim();
+            const complemento = document.getElementById('reg-complemento').value.trim();
+            const bairro = document.getElementById('reg-bairro').value.trim();
+            const cidade = document.getElementById('reg-cidade').value.trim();
+            const uf = document.getElementById('reg-uf').value.trim().toUpperCase();
+            const btn = e.target.querySelector('.btn-submit');
+
+            if (nome.length < 5 || !nome.includes(' ')) {
+                showAlert('error', 'Escreva seu nome completo, com sobrenome.');
+                return;
+            }
+
+            // O documento é opcional: quem deixou em branco passa
+            // direto. Quem preencheu tem o que escreveu conferido —
+            // meio CPF digitado às pressas no balcão é pior que nenhum.
+            if (documento && !documentoValido(documento)) {
+                showAlert('error', 'O CPF ou CNPJ informado não é válido. Confira os números, ou deixe o campo em branco para preencher depois.');
+                campoDoc.focus();
+                return;
+            }
+
+            const digitosTelefone = soNumeros(telefone);
+            if (digitosTelefone.length < 10 || digitosTelefone.length > 11) {
+                showAlert('error', 'Informe o telefone com DDD, como (31) 99999-9999.');
+                return;
+            }
+
+            if (cep.length !== 8) {
+                showAlert('error', 'Informe um CEP com 8 números.');
+                return;
+            }
+
+            if (uf.length !== 2) {
+                showAlert('error', 'O estado deve ter duas letras, como MG.');
+                return;
+            }
+
+            if (password !== password2) {
+                showAlert('error', 'As duas senhas estão diferentes. Confira antes de continuar.');
+                campoSenha2.focus();
+                return;
+            }
+
+            setLoading(btn, true, 'Conferindo dados...');
+
+            // Pergunta antes de enviar. Sem isto, um documento repetido
+            // só falharia lá dentro do banco, e o erro chegaria aqui
+            // como "Database error saving new user" — que não ajuda
+            // ninguém a entender o que fazer.
+            //
+            // Sem documento não há o que perguntar: no banco, cadastros
+            // sem documento não disputam lugar entre si.
+            if (documento) {
+                const { data: jaExiste } = await supabaseClient.rpc('documento_ja_cadastrado', { p_documento: documento });
+
+                if (jaExiste) {
+                    setLoading(btn, false);
+                    showAlert('error', 'Já existe uma conta com este CPF/CNPJ. Cada anunciante pode ter um cadastro. Acesse sua conta ou recupere a senha.');
+                    return;
+                }
+            }
+
+            setLoading(btn, true, 'Criando conta...');
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        nome_completo: nome,
+                        documento: documento,
+                        telefone: telefone,
+                        cep: cep,
+                        logradouro: logradouro,
+                        numero: numero,
+                        complemento: complemento,
+                        bairro: bairro,
+                        cidade: cidade,
+                        uf: uf
+                    },
+                    emailRedirectTo: window.location.origin + window.location.pathname.replace('cadastro.html', 'login.html')
+                }
+            });
+            setLoading(btn, false);
+
+            if (error) {
+                const recado = error.message.includes('already registered')
+                    ? 'Este e-mail já possui cadastro. Tente acessar sua conta.'
+                    // O banco recusou os dados (documento repetido ou
+                    // inválido). A mensagem crua dele é técnica demais.
+                    : /database error/i.test(error.message)
+                        ? 'Não foi possível concluir o cadastro. Confira o CPF/CNPJ e o endereço e tente de novo.'
+                        : 'Não foi possível criar a conta: ' + error.message;
+                showAlert('error', recado);
+                return;
+            }
+
+            // Monta a próxima URL levando o plano escolhido para o
+            // cadastro do comércio. Quem marcou a caixa de táxi vai por
+            // outro caminho: leva a categoria em vez do plano, porque
+            // essa categoria não paga e não escolhe plano nenhum.
+            const ehTaxi = document.getElementById('reg-taxi').checked;
+            const parametro = ehTaxi
+                ? '?categoria=taxi'
+                : (planoEscolhido ? '?plano=' + encodeURIComponent(planoEscolhido) : '');
+            const proximaUrl = '../dashboard/cadastrar-anuncio.html' + parametro;
+
+            if (data.session) {
+                // Projeto sem confirmação de e-mail: já entra logado e
+                // segue direto para o cadastro da loja.
+                window.location.href = proximaUrl;
+            } else {
+                // Projeto com confirmação: troca o formulário pela tela
+                // de espera, que segue sozinha quando o e-mail for
+                // confirmado — nesta aba ou em outra.
+                esperarConfirmacao(email, proximaUrl);
+            }
+        });
+    </script>
+</body>
+</html>

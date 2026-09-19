@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <title>Administração - Guia Comercial Buritis</title>
+
+    <!-- Painel interno: não interessa a buscador nenhum. -->
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="../assets/js/regras.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===== Cabeçalho ===== */
+        .admin-header {
+            background-color: #0f172a;
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .admin-header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .admin-marca {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .admin-marca img {
+            max-height: 44px;
+            width: auto;
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+
+        .admin-marca span {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .admin-acoes {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-acoes a,
+        .admin-acoes button {
+            background: none;
+            border: 1px solid #334155;
+            color: #cbd5e1;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .admin-acoes a:hover,
+        .admin-acoes button:hover {
+            border-color: #ff6600;
+            color: #ff6600;
+        }
+
+        /* ===== Título e resumo ===== */
+        .admin-topo {
+            padding: 28px 0 10px;
+        }
+
+        .admin-topo h1 {
+            font-size: 1.6rem;
+            color: #0f172a;
+        }
+
+        .admin-topo p {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .resumo {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 20px 0 8px;
+        }
+
+        @media (max-width: 800px) {
+            .resumo { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .resumo-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 18px;
+        }
+
+        .resumo-card span {
+            display: block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .resumo-card strong {
+            font-size: 1.6rem;
+            color: #0f172a;
+        }
+
+        /* ===== Filtros ===== */
+        .filtros {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 18px;
+            margin: 16px 0;
+        }
+
+        .filtro-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filtro-campo label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+        }
+
+        .filtro-campo select,
+        .filtro-campo input {
+            padding: 9px 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-family: inherit;
+            outline: none;
+            min-width: 190px;
+            background: #ffffff;
+        }
+
+        .filtro-campo select:focus,
+        .filtro-campo input:focus {
+            border-color: #2563eb;
+        }
+
+        .filtro-limpar {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 10px 6px;
+            text-decoration: underline;
+        }
+
+        .filtro-limpar:hover { color: #e11d48; }
+
+        /* ===== Tabela =====
+           A tabela é larga de propósito: é uma ferramenta de trabalho,
+           não uma página de site. Em tela estreita ela rola de lado
+           dentro da própria caixa, sem empurrar a página inteira. */
+        .tabela-caixa {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 50px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.86rem;
+            min-width: 1180px;
+        }
+
+        thead th {
+            background: #f1f5f9;
+            text-align: left;
+            padding: 12px 14px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            white-space: nowrap;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tbody td {
+            padding: 13px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover { background: #f8fafc; }
+
+        .celula-loja strong {
+            display: block;
+            color: #0f172a;
+            font-size: 0.92rem;
+        }
+
+        .celula-loja small,
+        .celula-pessoa small {
+            color: #94a3b8;
+            font-size: 0.78rem;
+        }
+
+        .celula-pessoa strong {
+            display: block;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .sem-anuncio {
+            color: #b45309;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        /* ===== Etiquetas e botões da linha ===== */
+        .etiqueta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .etiqueta.no-ar     { background: #dcfce7; color: #15803d; }
+        .etiqueta.fora      { background: #fee2e2; color: #b91c1c; }
+        .etiqueta.sem-loja  { background: #fef3c7; color: #92400e; }
+
+        .btn-alternar {
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 11px;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .btn-alternar:hover { border-color: #0f172a; }
+        .btn-alternar:disabled { opacity: 0.5; cursor: wait; }
+
+        .btn-alternar.ligado {
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: #c2410c;
+        }
+
+        .acoes-linha {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-acao {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #475569;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .btn-acao:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+        /* Excluir é o único botão que não tem volta. Fica cinza como os
+           outros até o mouse chegar nele, e só então mostra o vermelho:
+           destacado o tempo todo, viraria o botão mais chamativo de uma
+           linha onde tudo o mais é rotina. */
+        .btn-acao.perigo:hover {
+            border-color: #e11d48;
+            color: #e11d48;
+            background: #fff1f2;
+        }
+
+        .btn-acao.desligado {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* Falar é o único que sai do painel e vai para outro aplicativo,
+           e é o mais usado numa mesa de trabalho: o guia se constrói
+           conversando com lojista. Verde desde o começo, para o olho
+           achar sem ler os cinco botões da linha. */
+        .btn-acao.falar {
+            border-color: #86efac;
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .btn-acao.falar:hover {
+            border-color: #16a34a;
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        select.plano-select {
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            background: #ffffff;
+            cursor: pointer;
+        }
+
+        select.plano-select:disabled { opacity: 0.5; cursor: wait; }
+
+        /* ===== Avisos ===== */
+        .aviso {
+            padding: 50px 20px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .aviso i {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+        }
+
+        .barra-recado {
+            display: none;
+            margin: 0 0 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .barra-recado.mostrar { display: block; }
+        .barra-recado.ok  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .barra-recado.erro { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+        /* ===== Janela do cadastro ===== */
+        .fundo-janela {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 1000;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .fundo-janela.aberta { display: block; }
+
+        .janela {
+            background: #ffffff;
+            border-radius: 10px;
+            max-width: 620px;
+            margin: 20px auto;
+            padding: 26px;
+        }
+
+        .janela-topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+
+        .janela h2 {
+            font-size: 1.25rem;
+            color: #0f172a;
+        }
+
+        .janela-sub {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .btn-fechar {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .btn-fechar:hover { color: #0f172a; }
+
+        .janela-grade {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 560px) {
+            .janela-grade { grid-template-columns: 1fr; }
+        }
+
+        .janela-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .janela-campo.largo { grid-column: 1 / -1; }
+
+        .janela-campo label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .janela-campo input {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .janela-campo input:focus { border-color: #2563eb; }
+
+        .janela-campo input:read-only {
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+        .janela-rodape {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 18px;
+        }
+
+        .btn-salvar {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 11px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-salvar:hover { background: #1d4ed8; }
+        .btn-salvar:disabled { background: #cbd5e1; cursor: wait; }
+
+        .btn-cancelar {
+            background: none;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 11px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="admin-header">
+        <div class="container">
+            <a href="../index.html" class="admin-marca">
+                <img src="../assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis">
+                <span>Administração</span>
+            </a>
+            <div class="admin-acoes">
+                <!-- A volta para o painel do anunciante. O caminho de ida
+                     existe lá, no atalho "Administração"; sem este, quem
+                     entra aqui só sai pelo site ou saindo da conta. -->
+                <a href="../dashboard/dashboard.html"><i class="fa-solid fa-gauge"></i> Painel de Controle</a>
+                <a href="../index.html"><i class="fa-solid fa-arrow-left"></i> Ver o site</a>
+                <button type="button" id="btnSair"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Enquanto confere se quem entrou é administrador -->
+    <div id="telaVerificando" class="aviso">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Verificando seu acesso...
+    </div>
+
+    <main class="container" id="conteudo" style="display: none;">
+
+        <div class="admin-topo">
+            <h1>Anunciantes</h1>
+            <p>Cadastros e anúncios do guia, agrupados por cidade.</p>
+        </div>
+
+        <div class="resumo">
+            <div class="resumo-card">
+                <span>Anunciantes</span>
+                <strong id="totalAnunciantes">0</strong>
+            </div>
+            <div class="resumo-card">
+                <span>No ar</span>
+                <strong id="totalNoAr">0</strong>
+            </div>
+            <div class="resumo-card">
+                <span>Em destaque</span>
+                <strong id="totalDestaque">0</strong>
+            </div>
+            <div class="resumo-card">
+                <span>Sem loja cadastrada</span>
+                <strong id="totalSemLoja">0</strong>
+            </div>
+        </div>
+
+        <div class="filtros">
+            <div class="filtro-campo">
+                <label for="filtroCidade">Cidade</label>
+                <select id="filtroCidade">
+                    <option value="">Todas as cidades</option>
+                </select>
+            </div>
+
+            <div class="filtro-campo">
+                <label for="filtroSituacao">Situação</label>
+                <select id="filtroSituacao">
+                    <option value="">Todas</option>
+                    <option value="no-ar">No ar</option>
+                    <option value="fora">Fora do ar</option>
+                    <option value="destaque">Em destaque</option>
+                    <option value="sem-loja">Sem loja cadastrada</option>
+                </select>
+            </div>
+
+            <div class="filtro-campo">
+                <label for="filtroBusca">Buscar</label>
+                <input type="search" id="filtroBusca" placeholder="Loja, responsável, e-mail ou documento">
+            </div>
+
+            <button type="button" class="filtro-limpar" id="btnLimpar">Limpar filtros</button>
+        </div>
+
+        <div class="barra-recado" id="barraRecado"></div>
+
+        <div class="tabela-caixa">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Loja</th>
+                        <th>Cidade</th>
+                        <th>Responsável</th>
+                        <th>Contato</th>
+                        <th>Plano</th>
+                        <th>Números</th>
+                        <th>Situação</th>
+                        <th>Destaque</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <!-- Janela do cadastro do responsável -->
+    <div class="fundo-janela" id="janelaCadastro">
+        <div class="janela">
+            <div class="janela-topo">
+                <h2>Cadastro do responsável</h2>
+                <button type="button" class="btn-fechar" id="btnFecharJanela" aria-label="Fechar">&times;</button>
+            </div>
+            <p class="janela-sub" id="janelaSub"></p>
+
+            <form id="formCadastro">
+                <div class="janela-grade">
+                    <div class="janela-campo largo">
+                        <label for="ed-nome">Nome completo</label>
+                        <input type="text" id="ed-nome" required>
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-documento">CPF / CNPJ</label>
+                        <!-- Trava só depois de preenchido. O documento
+                             é conferido pelos dígitos e é único no
+                             banco; deixar trocar um que já existe
+                             abriria a porta para desfazer essa trava.
+                             Mas quem se cadastrou sem informar precisa
+                             de um lugar para informar depois, e é aqui.
+                             Quem decide é o JavaScript, ao abrir. -->
+                        <input type="text" id="ed-documento" placeholder="Ainda não informado">
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-email">E-mail de acesso</label>
+                        <!-- Só leitura: mudar o e-mail é mudar o login,
+                             e isso passa pela confirmação da própria
+                             pessoa, não pelo painel. -->
+                        <input type="text" id="ed-email" readonly>
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-telefone">Telefone</label>
+                        <input type="text" id="ed-telefone" required>
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-cep">CEP</label>
+                        <input type="text" id="ed-cep" required>
+                    </div>
+
+                    <div class="janela-campo largo">
+                        <label for="ed-logradouro">Endereço</label>
+                        <input type="text" id="ed-logradouro" required>
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-numero">Número</label>
+                        <input type="text" id="ed-numero" required>
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-complemento">Complemento</label>
+                        <input type="text" id="ed-complemento">
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-bairro">Bairro</label>
+                        <input type="text" id="ed-bairro" required>
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-cidade">Cidade</label>
+                        <input type="text" id="ed-cidade" required>
+                    </div>
+
+                    <div class="janela-campo">
+                        <label for="ed-uf">Estado</label>
+                        <input type="text" id="ed-uf" maxlength="2" required>
+                    </div>
+                </div>
+
+                <div class="janela-rodape">
+                    <button type="button" class="btn-cancelar" id="btnCancelar">Cancelar</button>
+                    <button type="submit" class="btn-salvar" id="btnSalvarCadastro">Salvar cadastro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    const supabaseClient = window.supabase.createClient(
+        window.CONFIG_SUPABASE.url,
+        window.CONFIG_SUPABASE.chavePublica
+    );
+
+    // Tudo o que o painel carregou. As buscas e filtros acontecem aqui
+    // na memória: são poucas centenas de linhas, e ir ao banco a cada
+    // tecla digitada deixaria a busca lenta sem motivo.
+    let anunciantes = [];
+
+    const NOMES_PLANO = {
+        '': 'Sem plano',
+        trimestral: 'Trimestral',
+        semestral: 'Semestral',
+        anual: 'Anual'
+    };
+
+    // ===================================================================
+    // ENTRADA
+    // ===================================================================
+    async function verificarAcesso() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+
+        if (!user) {
+            window.location.href = '../auth/login.html';
+            return;
+        }
+
+        // Quem decide é o banco, não esta página. Mesmo que alguém abra
+        // o endereço direto, a função de listagem recusa por conta
+        // própria — isto aqui só evita mostrar uma tela quebrada.
+        const { data: ehAdmin } = await supabaseClient.rpc('eh_admin');
+
+        if (!ehAdmin) {
+            document.getElementById('telaVerificando').innerHTML =
+                '<i class="fa-solid fa-lock"></i>' +
+                'Esta área é restrita à administração do guia.' +
+                '<br><br><a href="../index.html" style="color:#2563eb;">Voltar ao site</a>';
+            return;
+        }
+
+        document.getElementById('telaVerificando').style.display = 'none';
+        document.getElementById('conteudo').style.display = 'block';
+
+        await carregarAnunciantes();
+    }
+
+    async function carregarAnunciantes() {
+        const { data, error } = await supabaseClient.rpc('admin_listar_anunciantes');
+
+        if (error) {
+            recado('erro', 'Não foi possível carregar a lista: ' + error.message);
+            return;
+        }
+
+        anunciantes = data || [];
+        montarFiltroCidades();
+        atualizarResumo();
+        desenharTabela();
+    }
+
+    // A mesma regra que o banco usa para mostrar na busca (013): ligado
+    // pelo administrador e com o plano em dia. Táxi não vence.
+    function estaNoAr(a) {
+        if (!a.ativo) return false;
+        if (window.REGRAS.ehGratuita(a.categoria)) return true;
+        const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+        return Boolean(a.vence_em) && a.vence_em >= hoje;
+    }
+
+    // ===================================================================
+    // RESUMO E FILTROS
+    // ===================================================================
+    function atualizarResumo() {
+        const comLoja = anunciantes.filter((a) => a.anuncio_id);
+
+        document.getElementById('totalAnunciantes').innerText = anunciantes.length;
+        document.getElementById('totalNoAr').innerText = comLoja.filter(estaNoAr).length;
+        document.getElementById('totalDestaque').innerText = comLoja.filter((a) => a.destaque).length;
+        document.getElementById('totalSemLoja').innerText = anunciantes.length - comLoja.length;
+    }
+
+    function montarFiltroCidades() {
+        const select = document.getElementById('filtroCidade');
+        const escolhida = select.value;
+
+        // As cidades vêm dos próprios anúncios, então a lista mostra
+        // só o que existe de verdade — sem cidade vazia no filtro.
+        const cidades = [...new Set(anunciantes.map((a) => a.cidade).filter(Boolean))].sort();
+
+        select.innerHTML = '<option value="">Todas as cidades</option>' +
+            cidades.map((c) => `<option value="${c}">${titulo(c)}</option>`).join('');
+
+        select.value = escolhida;
+    }
+
+    function filtrar() {
+        const cidade = document.getElementById('filtroCidade').value;
+        const situacao = document.getElementById('filtroSituacao').value;
+        const termo = document.getElementById('filtroBusca').value.trim().toLowerCase();
+
+        return anunciantes.filter((a) => {
+            if (cidade && a.cidade !== cidade) return false;
+
+            if (situacao === 'no-ar' && !(a.anuncio_id && estaNoAr(a))) return false;
+            if (situacao === 'fora' && !(a.anuncio_id && !estaNoAr(a))) return false;
+            if (situacao === 'destaque' && !a.destaque) return false;
+            if (situacao === 'sem-loja' && a.anuncio_id) return false;
+
+            if (termo) {
+                const procuravel = [
+                    a.titulo, a.nome_completo, a.email, a.documento, a.telefone, a.categoria
+                ].filter(Boolean).join(' ').toLowerCase();
+
+                if (!procuravel.includes(termo)) return false;
+            }
+
+            return true;
+        });
+    }
+
+    // ===================================================================
+    // A TABELA
+    // ===================================================================
+    function desenharTabela() {
+        const corpo = document.getElementById('corpoTabela');
+        const lista = filtrar();
+
+        if (lista.length === 0) {
+            corpo.innerHTML = `
+                <tr><td colspan="9">
+                    <div class="aviso">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        ${anunciantes.length === 0
+                            ? 'Nenhum anunciante cadastrado ainda.'
+                            : 'Nenhum anunciante encontrado com esses filtros.'}
+                    </div>
+                </td></tr>`;
+            return;
+        }
+
+        corpo.innerHTML = lista.map(linha).join('');
+    }
+
+    // ===================================================================
+    // FALAR COM O LOJISTA
+    //
+    // Abre o WhatsApp já na conversa certa, com um "olá" escrito. O
+    // guia se constrói por visita e por conversa, e sem isto era copiar
+    // o número da tela, abrir o WhatsApp, colar, e escrever tudo de novo
+    // a cada loja.
+    //
+    // Vale também para quem ainda não cadastrou loja nenhuma. Essa
+    // pessoa é justamente a que mais precisa de um empurrão: criou a
+    // conta e parou no meio.
+    //
+    // O telefone é o do responsável, do cadastro dele — não o WhatsApp
+    // da loja, que é o número de atendimento ao cliente e pode ser o
+    // do balcão, com outra pessoa do outro lado.
+    // "Olá, Reginaldo!" quando o nome veio no cadastro, "Olá!" quando
+    // não veio. Sem isto a mensagem abria com "Olá, !" — vírgula solta
+    // e ponto de exclamação, logo na primeira linha da conversa.
+    function saudacao(primeiroNome) {
+        return primeiroNome ? `Olá, ${primeiroNome}!` : 'Olá!';
+    }
+
+    // A mensagem de quem criou a conta e não publicou o anúncio.
+    //
+    // Ela vem pronta porque esse caso vai se repetir muito, e o que se
+    // repete acaba não sendo feito: escrever tudo de novo a cada
+    // cadastro parado é o tipo de trabalho que se adia até a pessoa
+    // esfriar. Aqui é um clique, com o texto sempre igual — e um texto
+    // igual é um texto que dá para melhorar depois de ver o que
+    // responde bem.
+    //
+    // O tom é de ajuda, não de cobrança: quem parou no meio geralmente
+    // travou em alguma coisa (a foto, o horário, a categoria), e a
+    // pergunta aberta abre a conversa melhor do que a insistência.
+    function mensagemDeRetomada(primeiroNome) {
+        const linhas = [
+            `${saudacao(primeiroNome)} Tudo bem? Aqui é do Guia Comercial Buritis e Região.`,
+            '',
+            'Vi que você não finalizou o anúncio do seu negócio. Teve alguma dificuldade ou dúvida? Estou aqui pra ajudar no que precisar ou esclarecer qualquer coisa.',
+            '',
+            'E você está fazendo muito bem em divulgar seu comércio no novo meio de comunicação do Buritis e região, entre o comércio e os moradores do bairro. É lá que quem procura acha — e quem não está, não aparece.'
+        ];
+
+        // A linha do prazo só entra enquanto ela for verdade. Prometer
+        // cadastro gratuito depois que a promoção acabar é pior do que
+        // não falar de preço nenhum — a conversa começaria por uma
+        // informação que o site vai desmentir no clique seguinte.
+        if (window.REGRAS.promocaoValendo()) {
+            const prazo = window.REGRAS.gratisAte.toLocaleDateString('pt-BR');
+            linhas.push('', `O cadastro está gratuito até ${prazo}. Depois dessa data, só com plano.`);
+        }
+
+        // Fecha com pergunta, e não com despedida. A pessoa parou no meio
+        // por algum motivo que ela mesma talvez não saiba explicar; um
+        // "quer que eu te ajude?" é mais fácil de responder do que um
+        // "termine seu cadastro", e é a resposta que abre a conversa.
+        linhas.push('', 'Quer que eu te ajude a terminar agora? Leva poucos minutos.');
+
+        return linhas.join('\n');
+    }
+
+    function botaoFalar(a) {
+        const digitos = soNumeros(a.telefone);
+
+        // Onze dígitos é celular. Dez é fixo, e WhatsApp de número fixo
+        // abre uma conversa que não existe: o botão fica apagado, com o
+        // motivo no title, em vez de prometer o que não entrega.
+        if (digitos.length !== 11) {
+            return `<span class="btn-acao falar desligado"
+                          title="${digitos.length === 10
+                              ? 'Telefone fixo: não dá para chamar no WhatsApp'
+                              : 'Sem telefone cadastrado'}">
+                        <i class="fa-brands fa-whatsapp"></i> Falar
+                    </span>`;
+        }
+
+        const primeiroNome = (a.nome_completo || '').trim().split(/\s+/)[0] || '';
+
+        // Duas conversas diferentes saem deste mesmo botão. Quem já tem
+        // anúncio no ar recebe só a abertura, porque o assunto varia —
+        // renovação, foto trocada, uma dúvida qualquer. Quem parou antes
+        // de publicar recebe a mensagem inteira, que é sempre a mesma.
+        const texto = a.anuncio_id
+            ? `${saudacao(primeiroNome)} Aqui é do Guia Comercial Buritis e Região.`
+            : mensagemDeRetomada(primeiroNome);
+
+        const link = `https://wa.me/55${digitos}?text=${encodeURIComponent(texto)}`;
+
+        return `<a class="btn-acao falar" href="${link}" target="_blank" rel="noopener"
+                   title="Chamar ${escapar(a.nome_completo || '')} no WhatsApp">
+                    <i class="fa-brands fa-whatsapp"></i> Falar
+                </a>`;
+    }
+
+    function linha(a) {
+        const temLoja = Boolean(a.anuncio_id);
+
+        const situacao = !temLoja
+            ? '<span class="etiqueta sem-loja"><i class="fa-solid fa-circle-exclamation"></i> Sem loja</span>'
+            : !a.ativo
+                ? '<span class="etiqueta fora"><i class="fa-solid fa-circle-minus"></i> Fora do ar</span>'
+            : !estaNoAr(a)
+                ? `<span class="etiqueta fora"><i class="fa-solid fa-clock"></i> ${a.vence_em ? 'Vencido' : 'Aguardando pagamento'}</span>`
+            : '<span class="etiqueta no-ar"><i class="fa-solid fa-circle-check"></i> No ar</span>';
+
+        const opcoesPlano = Object.entries(NOMES_PLANO).map(([valor, nome]) =>
+            `<option value="${valor}" ${(a.plano || '') === valor ? 'selected' : ''}>${nome}</option>`
+        ).join('');
+
+        return `
+            <tr>
+                <td class="celula-loja">
+                    ${temLoja
+                        ? `<strong>${escapar(a.titulo)}</strong><small>${escapar(a.categoria || '')}</small>`
+                        : '<span class="sem-anuncio">ainda não cadastrou</span>'}
+                </td>
+
+                <td>${temLoja ? titulo(a.cidade) : '—'}</td>
+
+                <td class="celula-pessoa">
+                    <strong>${escapar(a.nome_completo)}</strong>
+                    <small>${a.documento
+                        ? `${a.tipo_documento === 'cnpj' ? 'CNPJ' : 'CPF'} ${formatarDocumento(a.documento)}`
+                        : 'Documento não informado'}</small>
+                </td>
+
+                <td class="celula-pessoa">
+                    <strong>${formatarTelefone(a.telefone)}</strong>
+                    <small>${escapar(a.email || '')}</small>
+                </td>
+
+                <td>
+                    <select class="plano-select" data-plano="${a.anuncio_id || ''}" ${temLoja ? '' : 'disabled'}>
+                        ${opcoesPlano}
+                    </select>
+                    ${(() => {
+                        // Até quando a loja fica no ar (vence_em). O pagamento
+                        // estende sozinho; o campo é para quem pagou por fora
+                        // (Pix direto, dinheiro): mudar a data libera na hora.
+                        // Táxi não vence, e não mostra campo nenhum.
+                        if (!temLoja || window.REGRAS.ehGratuita(a.categoria)) return '';
+                        const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+                        const vencido = !a.vence_em || a.vence_em < hoje;
+                        return `<label style="display:block; margin-top:6px; font-size:0.72rem; color:${vencido ? '#b91c1c' : '#64748b'};">
+                                    ${a.vence_em ? (vencido ? 'venceu em' : 'vence em') : 'sem pagamento'}
+                                    <input type="date" class="vence-input" data-vence="${a.anuncio_id}" value="${a.vence_em || ''}"
+                                           style="display:block; margin-top:2px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem;">
+                                </label>`;
+                    })()}
+                </td>
+
+                <td>
+                    <small style="color:#64748b;">
+                        <i class="fa-solid fa-eye"></i> ${a.visualizacoes ?? 0}
+                        &nbsp;·&nbsp;
+                        <i class="fa-brands fa-whatsapp"></i> ${a.cliques_whatsapp ?? 0}
+                    </small>
+                </td>
+
+                <td>
+                    ${situacao}
+                    ${temLoja ? `
+                        <br>
+                        <button type="button" class="btn-alternar" style="margin-top:7px;"
+                                data-ativo="${a.anuncio_id}" data-valor="${a.ativo}">
+                            ${a.ativo ? 'Tirar do ar' : 'Colocar no ar'}
+                        </button>` : ''}
+                </td>
+
+                <td>
+                    ${temLoja ? `
+                        <button type="button" class="btn-alternar ${a.destaque ? 'ligado' : ''}"
+                                data-destaque="${a.anuncio_id}" data-valor="${a.destaque}">
+                            <i class="fa-solid fa-star"></i>
+                            ${a.destaque ? 'Em destaque' : 'Destacar'}
+                        </button>` : '—'}
+                </td>
+
+                <td>
+                    <div class="acoes-linha">
+                        ${botaoFalar(a)}
+
+                        <a class="btn-acao ${temLoja ? '' : 'desligado'}"
+                           href="${temLoja ? '../anuncio-detalhes.html?id=' + a.anuncio_id : '#'}"
+                           target="_blank" rel="noopener" title="Ver anúncio publicado">
+                            <i class="fa-solid fa-eye"></i> Anúncio
+                        </a>
+
+                        <a class="btn-acao ${temLoja ? '' : 'desligado'}"
+                           href="${temLoja ? '../dashboard/cadastrar-anuncio.html?id=' + a.anuncio_id : '#'}"
+                           title="Editar o anúncio">
+                            <i class="fa-solid fa-pen"></i> Editar
+                        </a>
+
+                        <button type="button" class="btn-acao" data-cadastro="${a.perfil_id}"
+                                title="Ver e editar o cadastro do responsável">
+                            <i class="fa-solid fa-id-card"></i> Cadastro
+                        </button>
+
+                        <!-- Vale para linha com loja e sem loja: o que se
+                             apaga é o anunciante, e o anúncio vai junto
+                             se existir. -->
+                        <button type="button" class="btn-acao perigo"
+                                data-excluir="${a.perfil_id}"
+                                data-nome="${escapar(a.nome_completo || a.email || 'este cadastro')}"
+                                data-loja="${escapar(a.titulo || '')}"
+                                title="Excluir este anunciante do guia">
+                            <i class="fa-solid fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+    }
+
+    // ===================================================================
+    // MUDANÇAS NA LINHA
+    //
+    // Tudo passa por aqui: um clique só, sem tela de confirmação, e a
+    // linha se redesenha. Se o banco recusar, o valor volta ao que era
+    // e a barra de recado explica — em vez de a tela mostrar uma coisa
+    // e o banco guardar outra.
+    // ===================================================================
+    async function salvarCampo(anuncioId, campo, valor, botao) {
+        if (botao) botao.disabled = true;
+
+        const { error } = await supabaseClient
+            .from('anuncios')
+            .update({ [campo]: valor })
+            .eq('id', anuncioId);
+
+        if (botao) botao.disabled = false;
+
+        if (error) {
+            recado('erro', 'Não foi possível salvar: ' + error.message);
+            desenharTabela();
+            return false;
+        }
+
+        // Guarda também na lista da memória, para os filtros e o resumo
+        // não ficarem discordando da tela.
+        const item = anunciantes.find((a) => a.anuncio_id === anuncioId);
+        if (item) item[campo] = valor;
+
+        atualizarResumo();
+        desenharTabela();
+        return true;
+    }
+
+    document.addEventListener('click', async (e) => {
+        const btnAtivo = e.target.closest('[data-ativo]');
+        if (btnAtivo) {
+            const ligado = btnAtivo.dataset.valor === 'true';
+            const ok = await salvarCampo(btnAtivo.dataset.ativo, 'ativo', !ligado, btnAtivo);
+            if (ok) recado('ok', ligado ? 'Anúncio tirado do ar.' : 'Anúncio de volta ao ar.');
+            return;
+        }
+
+        const btnDestaque = e.target.closest('[data-destaque]');
+        if (btnDestaque) {
+            const ligado = btnDestaque.dataset.valor === 'true';
+            const ok = await salvarCampo(btnDestaque.dataset.destaque, 'destaque', !ligado, btnDestaque);
+            if (ok) recado('ok', ligado ? 'Tirado dos destaques.' : 'Colocado em destaque.');
+            return;
+        }
+
+        const btnCadastro = e.target.closest('[data-cadastro]');
+        if (btnCadastro) {
+            abrirCadastro(btnCadastro.dataset.cadastro);
+        }
+
+        const btnExcluir = e.target.closest('[data-excluir]');
+        if (btnExcluir) {
+            excluirAnunciante(btnExcluir);
+        }
+    });
+
+    // ===================================================================
+    // EXCLUIR UM ANUNCIANTE
+    //
+    // Diferente de todo o resto do painel, isto não tem volta: some a
+    // conta de login, o cadastro e o anúncio. Por isso é a única ação
+    // que pergunta antes, e a pergunta diz o nome de quem vai sair —
+    // um "tem certeza?" genérico não impede o clique na linha errada.
+    //
+    // Quem apaga de verdade é a função no banco, que confere se quem
+    // pediu é administrador. A confirmação daqui é para o dedo, não
+    // para a segurança: qualquer um poderia chamar a API direto.
+    // ===================================================================
+    async function excluirAnunciante(botao) {
+        const id = botao.dataset.excluir;
+        const nome = botao.dataset.nome;
+        const loja = botao.dataset.loja;
+
+        const oQueSai = loja
+            ? `o cadastro de ${nome} e o anúncio da loja ${loja}`
+            : `o cadastro de ${nome}`;
+
+        if (!confirm(
+            `Excluir ${oQueSai}?\n\n` +
+            'A conta de login, o cadastro e o anúncio são apagados.\n' +
+            'Não há como desfazer.'
+        )) {
+            return;
+        }
+
+        botao.disabled = true;
+
+        const { error } = await supabaseClient.rpc('admin_excluir_anunciante', { p_id: id });
+
+        if (error) {
+            botao.disabled = false;
+            recado('erro', error.message || 'Não foi possível excluir.');
+            return;
+        }
+
+        recado('ok', 'Cadastro excluído.');
+        await carregarAnunciantes();
+    }
+
+    document.addEventListener('change', async (e) => {
+        const campoVence = e.target.closest('[data-vence]');
+        if (campoVence) {
+            campoVence.disabled = true;
+            const ok = await salvarCampo(campoVence.dataset.vence, 'vence_em', campoVence.value || null, null);
+            campoVence.disabled = false;
+            if (ok) recado('ok', campoVence.value ? 'Vencimento atualizado.' : 'Vencimento apagado: a loja saiu da busca.');
+            return;
+        }
+
+        const select = e.target.closest('[data-plano]');
+        if (!select) return;
+
+        select.disabled = true;
+
+        // Vazio no select quer dizer "sem plano", que no banco é nulo —
+        // e não um texto vazio, que ficaria parecendo um plano chamado "".
+        const escolhido = select.value || null;
+        const ok = await salvarCampo(select.dataset.plano, 'plano', escolhido, null);
+
+        select.disabled = false;
+        if (ok) recado('ok', 'Plano atualizado.');
+    });
+
+    // ===================================================================
+    // JANELA DO CADASTRO
+    // ===================================================================
+    let perfilEmEdicao = null;
+
+    function abrirCadastro(perfilId) {
+        const a = anunciantes.find((x) => x.perfil_id === perfilId);
+        if (!a) return;
+
+        perfilEmEdicao = perfilId;
+
+        document.getElementById('janelaSub').innerText =
+            a.titulo ? `Responsável por ${a.titulo}` : 'Ainda sem loja cadastrada';
+
+        document.getElementById('ed-nome').value = a.nome_completo || '';
+        document.getElementById('ed-email').value = a.email || '';
+
+        // O documento abre para digitar só quando está em branco. Uma
+        // vez gravado, vira só leitura de novo: é ele que impede a
+        // mesma pessoa de abrir várias contas enquanto o guia é grátis.
+        const campoDoc = document.getElementById('ed-documento');
+        campoDoc.value = a.documento ? formatarDocumento(a.documento) : '';
+        campoDoc.readOnly = Boolean(a.documento);
+
+        document.getElementById('ed-telefone').value = a.telefone || '';
+        document.getElementById('ed-cep').value = a.cep || '';
+        document.getElementById('ed-logradouro').value = a.logradouro || '';
+        document.getElementById('ed-numero').value = a.numero || '';
+        document.getElementById('ed-complemento').value = a.complemento || '';
+        document.getElementById('ed-bairro').value = a.bairro || '';
+        document.getElementById('ed-cidade').value = a.cidade_responsavel || '';
+        document.getElementById('ed-uf').value = a.uf || '';
+
+        document.getElementById('janelaCadastro').classList.add('aberta');
+    }
+
+    function fecharCadastro() {
+        document.getElementById('janelaCadastro').classList.remove('aberta');
+        perfilEmEdicao = null;
+    }
+
+    document.getElementById('btnFecharJanela').addEventListener('click', fecharCadastro);
+    document.getElementById('btnCancelar').addEventListener('click', fecharCadastro);
+
+    // Clicar fora da janela fecha; clicar dentro, não.
+    document.getElementById('janelaCadastro').addEventListener('click', (e) => {
+        if (e.target.id === 'janelaCadastro') fecharCadastro();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') fecharCadastro();
+    });
+
+    document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const botao = document.getElementById('btnSalvarCadastro');
+        botao.disabled = true;
+        botao.innerText = 'Salvando...';
+
+        const mudancas = {
+            nome_completo: document.getElementById('ed-nome').value.trim(),
+            telefone: document.getElementById('ed-telefone').value.trim(),
+            cep: soNumeros(document.getElementById('ed-cep').value),
+            logradouro: document.getElementById('ed-logradouro').value.trim(),
+            numero: document.getElementById('ed-numero').value.trim(),
+            complemento: document.getElementById('ed-complemento').value.trim() || null,
+            bairro: document.getElementById('ed-bairro').value.trim(),
+            cidade: document.getElementById('ed-cidade').value.trim(),
+            uf: document.getElementById('ed-uf').value.trim().toUpperCase()
+        };
+
+        // Só entra na atualização quando o campo estava aberto para
+        // digitar, ou seja, quando o cadastro veio sem documento. Em
+        // branco continua em branco: nulo, e não texto vazio, senão o
+        // segundo cadastro sem documento bateria de frente com este no
+        // índice único.
+        const campoDoc = document.getElementById('ed-documento');
+        if (!campoDoc.readOnly) {
+            mudancas.documento = soNumeros(campoDoc.value) || null;
+        }
+
+        const { error } = await supabaseClient
+            .from('perfis')
+            .update(mudancas)
+            .eq('id', perfilEmEdicao);
+
+        botao.disabled = false;
+        botao.innerText = 'Salvar cadastro';
+
+        if (error) {
+            // O banco confere o documento pelos dígitos. A recusa dele
+            // chega como texto técnico; aqui vira recado de gente.
+            const recadoErro = /perfis_documento_check/.test(error.message)
+                ? 'Este CPF/CNPJ não é válido. Confira os números, ou deixe o campo em branco.'
+                : /duplicate key|unique/i.test(error.message)
+                    ? 'Este CPF/CNPJ já está em outro cadastro do guia.'
+                    : 'Não foi possível salvar o cadastro: ' + error.message;
+            recado('erro', recadoErro);
+            return;
+        }
+
+        // Recarrega do banco em vez de remendar a lista na memória: o
+        // cadastro tem campos demais para manter os dois lados iguais
+        // na mão sem esquecer nenhum.
+        fecharCadastro();
+        await carregarAnunciantes();
+        recado('ok', 'Cadastro atualizado.');
+    });
+
+    // ===================================================================
+    // MIUDEZAS
+    // ===================================================================
+    function recado(tipo, texto) {
+        const barra = document.getElementById('barraRecado');
+        barra.className = 'barra-recado mostrar ' + tipo;
+        barra.innerText = texto;
+
+        clearTimeout(barra.relogio);
+        barra.relogio = setTimeout(() => barra.classList.remove('mostrar'), 4000);
+    }
+
+    const soNumeros = (v) => (v || '').replace(/\D/g, '');
+
+    // O nome da loja e do responsável vêm do que a pessoa digitou.
+    // Jogar isso direto no HTML deixaria alguém escrever código na
+    // página do administrador só preenchendo o cadastro.
+    function escapar(texto) {
+        const caixa = document.createElement('div');
+        caixa.innerText = texto ?? '';
+        return caixa.innerHTML;
+    }
+
+    // As cidades são guardadas em minúsculas para a busca do site
+    // funcionar; aqui aparecem como se escreve.
+    function titulo(texto) {
+        return (texto || '').replace(/\b\p{L}/gu, (letra) => letra.toUpperCase());
+    }
+
+    function formatarDocumento(d) {
+        const n = soNumeros(d);
+        if (n.length === 11) return n.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        if (n.length === 14) return n.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+        return n;
+    }
+
+    function formatarTelefone(t) {
+        const n = soNumeros(t);
+        if (n.length === 11) return n.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        if (n.length === 10) return n.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        return t || '';
+    }
+
+    document.getElementById('filtroCidade').addEventListener('change', desenharTabela);
+    document.getElementById('filtroSituacao').addEventListener('change', desenharTabela);
+    document.getElementById('filtroBusca').addEventListener('input', desenharTabela);
+
+    document.getElementById('btnLimpar').addEventListener('click', () => {
+        document.getElementById('filtroCidade').value = '';
+        document.getElementById('filtroSituacao').value = '';
+        document.getElementById('filtroBusca').value = '';
+        desenharTabela();
+    });
+
+    document.getElementById('btnSair').addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.href = '../index.html';
+    });
+
+    verificarAcesso();
+</script>
+
+</body>
+</html>

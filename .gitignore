@@ -1,0 +1,19 @@
+# Arquivos com senhas / dados sensíveis
+Dados do Site.txt
+.env
+.env.*
+
+# Dependências
+node_modules/
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+
+# Documentos comerciais: ficam na maquina, nao vao para o site publicado
+patrocinio.md

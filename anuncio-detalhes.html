@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Anúncio | Guia Comercial Buritis e Região</title>
+
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="assets/js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #333333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* O mesmo laranja e o mesmo desenho do selo que trouxe a
+           pessoa até aqui, no card da vitrine. Chegar e não reencontrar
+           a promessa que fez clicar é o que faz duvidar dela. */
+        .selo-entrega-detalhe {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: #ff6600;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            padding: 18px 0;
+            font-size: 0.82rem;
+            color: #94a3b8;
+        }
+        .breadcrumb a { color: #64748b; text-decoration: none; }
+        .breadcrumb a:hover { color: #2563eb; }
+        .breadcrumb i { font-size: 0.65rem; margin: 0 8px; }
+
+        /* ===== LAYOUT PRINCIPAL ===== */
+        .detalhe-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            grid-template-areas:
+                "titulo    titulo"
+                "principal lateral"
+                "mapa      lateral";
+            gap: 32px;
+            padding-bottom: 70px;
+            align-items: start;
+        }
+        /* O título ocupa a largura inteira, acima das duas colunas, para
+           que a foto e a caixa de contato comecem na mesma altura. O
+           espaço embaixo dele vem do "gap" da grade, então o bloco não
+           acrescenta o próprio. */
+        .detalhe-titulo-largo {
+            grid-area: titulo;
+            padding-bottom: 0;
+        }
+
+        .detalhe-principal { grid-area: principal; }
+        .detalhe-lateral { grid-area: lateral; }
+        .detalhe-mapa-secao { grid-area: mapa; }
+
+        @media (max-width: 900px) {
+            .detalhe-wrapper {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "titulo"
+                    "principal"
+                    "lateral"
+                    "mapa";
+            }
+        }
+
+        /* Imagem hero */
+        .detalhe-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 380px;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #f1f5f9;
+            background-size: contain;
+            background-position: center center;
+            background-repeat: no-repeat;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .detalhe-cat-badge {
+            position: absolute; bottom: 16px; left: 20px;
+            background: rgba(15, 23, 42, 0.85); color: #fff;
+            padding: 7px 16px; border-radius: 20px; font-size: 0.78rem;
+            font-weight: 700; letter-spacing: 0.3px;
+        }
+
+        /* Selo da logo sobreposto no canto superior da imagem */
+        .detalhe-logo-badge {
+            position: absolute; top: 14px; left: 14px;
+            width: 60px; height: 60px; border-radius: 50%;
+            background-color: #fff; background-size: contain; background-position: center;
+            background-repeat: no-repeat; border: 3px solid #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18); z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .detalhe-logo-badge i { color: #94a3b8; font-size: 1.3rem; }
+
+        @media (max-width: 480px) {
+            .detalhe-img-wrapper { height: 230px; }
+        }
+
+        /* Bloco de título / conteúdo principal */
+        .detalhe-titulo-bloco { padding: 26px 0 10px; }
+        .detalhe-titulo-bloco h1 {
+            font-size: 1.7rem; color: #0f172a; font-weight: 800; margin-bottom: 10px;
+        }
+        .detalhe-meta {
+            display: flex; flex-wrap: wrap; gap: 18px; color: #64748b;
+            font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;
+        }
+        .detalhe-meta span { display: flex; align-items: center; gap: 6px; }
+        .detalhe-meta i { color: #2563eb; }
+
+        .detalhe-descricao {
+            margin-top: 20px; color: #475569; font-size: 0.95rem; line-height: 1.75;
+            white-space: pre-line;
+        }
+
+        /* Bloco de título (agora fica acima da imagem) */
+        .detalhe-titulo-bloco-top { padding: 20px 0 16px; }
+        .detalhe-titulo-bloco-top h1 { font-size: 1.5rem; }
+
+        /* Faixa de miniaturas clicáveis abaixo da imagem principal */
+        .detalhe-thumb-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .detalhe-thumb-strip img {
+            width: 100%; height: 60px; object-fit: cover; border-radius: 6px;
+            border: 2px solid transparent; cursor: pointer; opacity: 0.75;
+            transition: 0.15s; display: block;
+        }
+        .detalhe-thumb-strip img:hover { opacity: 1; }
+        .detalhe-thumb-strip img.ativa { border-color: #2563eb; opacity: 1; }
+
+        /* Seção "Sobre" (descrição) */
+        .detalhe-sobre { margin-top: 22px; }
+        .detalhe-sobre h2 { font-size: 1rem; color: #0f172a; font-weight: 800; margin-bottom: 8px; }
+
+        /* Mapa */
+        .detalhe-mapa-bloco { margin-top: 34px; }
+        .detalhe-mapa-bloco h2 {
+            font-size: 1.1rem; color: #0f172a; font-weight: 800; margin-bottom: 14px;
+        }
+        .detalhe-mapa-frame {
+            width: 100%; height: 300px; border: 1px solid #e2e8f0; border-radius: 12px;
+            overflow: hidden;
+        }
+        .detalhe-mapa-frame iframe { width: 100%; height: 100%; border: 0; }
+
+        /* ===== SIDEBAR DE CONTATO =====
+           A caixa acompanha a página, como a foto ao lado dela. Já foi
+           "sticky", seguindo a rolagem: numa página curta — a de um
+           taxista, por exemplo, que não tem descrição, endereço nem
+           horário — ela descolava da foto e ficava flutuando sozinha
+           num espaço vazio. O nome da classe ficou como lembrete de
+           que esse caminho já foi tentado. */
+        .sidebar-sticky-wrap {
+            grid-area: lateral;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .contato-card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+            padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .contato-header { text-align: center; margin-bottom: 18px; }
+        .contato-logo {
+            width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 12px;
+            background-color: #f8fafc; background-size: contain; background-position: center;
+            background-repeat: no-repeat; border: 3px solid #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .contato-header h3 { font-size: 1.05rem; color: #0f172a; font-weight: 800; margin-bottom: 6px; }
+        .contato-header .contato-endereco-mini {
+            font-size: 0.78rem; color: #94a3b8; display: flex; align-items: center;
+            justify-content: center; gap: 5px; line-height: 1.4;
+        }
+
+        .contato-divider { border: none; border-top: 1px solid #f1f5f9; margin: 18px 0; }
+
+        .contato-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            font-size: 0.87rem; color: #334155; margin-bottom: 16px;
+        }
+        .contato-item i {
+            width: 36px; height: 36px; flex-shrink: 0; border-radius: 9px;
+            background: #eff6ff; color: #2563eb; display: flex; align-items: center;
+            justify-content: center; font-size: 0.92rem;
+        }
+        .contato-item a { color: inherit; text-decoration: none; }
+        .contato-item a:hover { color: #2563eb; }
+
+        .contato-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .contato-btn {
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            padding: 14px; border-radius: 9px; font-weight: 700; font-size: 0.87rem;
+            text-decoration: none; border: none; cursor: pointer; transition: 0.2s;
+        }
+        .btn-whats { background: #22c55e; color: #fff; }
+        .btn-whats:hover { background: #16a34a; }
+        .btn-call { background: #eff6ff; color: #2563eb; }
+        .btn-call:hover { background: #dbeafe; }
+        .btn-site { background: #f1f5f9; color: #334155; }
+        .btn-site:hover { background: #e2e8f0; }
+
+        .contato-stats {
+            margin-top: 20px; padding-top: 18px; border-top: 1px solid #f1f5f9;
+            font-size: 0.78rem; color: #94a3b8; display: flex; align-items: center; gap: 8px;
+        }
+        .contato-stats i { color: #cbd5e1; }
+
+        .contato-social { display: flex; justify-content: center; gap: 10px; margin-top: 18px; }
+        .contato-social a {
+            width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; color: #64748b;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+            font-size: 1rem; transition: 0.2s;
+        }
+        .contato-social a:hover { background: #2563eb; color: #fff; }
+
+        /* Caixa de horário de funcionamento */
+        .horario-card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+            padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .horario-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .horario-card-header i { color: #2563eb; font-size: 1.1rem; }
+        .horario-card-header h3 { font-size: 0.95rem; color: #0f172a; font-weight: 800; letter-spacing: 0.3px; }
+        .horario-status { font-size: 0.78rem; font-weight: 700; margin-bottom: 14px; }
+        .horario-status.aberto { color: #16a34a; }
+        .horario-status.fechado { color: #e11d48; }
+        .horario-linha-view {
+            display: flex; justify-content: space-between; font-size: 0.83rem;
+            padding: 6px 0; border-bottom: 1px dashed #f1f5f9; color: #475569;
+        }
+        .horario-linha-view:last-child { border-bottom: none; }
+        .horario-linha-view.dia-hoje { color: #0f172a; font-weight: 700; }
+        .horario-linha-view .horario-fechado-label { color: #cbd5e1; }
+
+        .estado-carregando, .estado-erro {
+            text-align: center; color: #94a3b8; padding: 100px 20px; grid-column: 1 / -1;
+        }
+        .estado-carregando i, .estado-erro i { font-size: 1.8rem; margin-bottom: 12px; display: block; }
+        .estado-erro i { color: #f87171; }
+
+        /* ===== FOOTER ===== */
+        .main-footer { background-color: #0f172a; padding: 40px 0; text-align: center; margin-top: 30px; }
+        .main-footer p { color: #94a3b8; font-size: 0.8rem; margin-top: 15px; }
+    </style>
+    <script src="assets/js/regras.js"></script>
+    <script src="assets/js/menu-promocao.js"></script>
+    <!-- Troca a chave de Entrar pelo atalho do painel e mostra o Sair,
+         quando ha sessao aberta. -->
+    <script src="assets/js/sessao.js" defer></script>
+    <!-- Cabecalho e menu sanduiche: um arquivo so para o site inteiro. -->
+    <script src="assets/js/loja.js"></script>
+    <link rel="stylesheet" href="assets/css/header.css">
+    <script src="assets/js/menu.js" defer></script>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/img/ComercioBuritisLogo.png" alt="Guia Comercial Buritis">
+            </a>
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">INÍCIO</a>
+                <a href="planos.html">PLANOS</a>
+                <a href="sobrenos.html">SOBRE NÓS</a>
+                <a href="fale-conosco.html">FALE CONOSCO</a>
+            </nav>
+            <div class="header-actions">
+                <a href="auth/login.html" class="btn-icon-login" title="Entrar"><i class="fa-solid fa-key"></i></a>
+                <a href="planos.html" class="btn-add-listing">+ CADASTRAR ANÚNCIO</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumb" id="breadcrumb">
+            <a href="index.html">Início</a> <i class="fa-solid fa-chevron-right"></i> Carregando...
+        </div>
+
+        <div id="conteudoDetalhe">
+            <div class="estado-carregando">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Carregando anúncio...
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2026 Guia Comercial Buritis e Região. Todos os direitos reservados: <a href="https://mesquitasaas.online/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Mesquita SaaS</a>.</p>
+        </div>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = window.CONFIG_SUPABASE.url;
+        const SUPABASE_ANON_KEY = window.CONFIG_SUPABASE.chavePublica;
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function carregarDetalheAnuncio() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const container = document.getElementById('conteudoDetalhe');
+            const breadcrumb = document.getElementById('breadcrumb');
+
+            if (!id) {
+                container.innerHTML = `<div class="estado-erro"><i class="fa-solid fa-triangle-exclamation"></i>Anúncio não informado.</div>`;
+                return;
+            }
+
+            const { data: anuncio, error } = await supabaseClient
+                .from('anuncios')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error || !anuncio) {
+                container.innerHTML = `<div class="estado-erro"><i class="fa-solid fa-triangle-exclamation"></i>Não foi possível carregar este anúncio.</div>`;
+                return;
+            }
+
+            // Soma uma visualização. Quem visita o guia não tem login, então
+            // a conta é feita por uma função do banco que só sabe somar 1 —
+            // liberar alteração direta na tabela deixaria qualquer visitante
+            // reescrever o anúncio de qualquer loja.
+            // Não trava a exibição da página se falhar.
+            supabaseClient.rpc('registrar_visualizacao', { p_anuncio: id }).then(() => {});
+
+            // Anúncio fora do ar: some da vitrine, mas continua abrindo
+            // por link direto — é assim que o administrador consegue
+            // conferir o que tirou do ar, e o anunciante consegue ver a
+            // própria loja. O aviso deixa claro que ninguém mais a
+            // encontra pelo site.
+            if (anuncio.ativo === false) {
+                const faixa = document.createElement('div');
+                faixa.style.cssText = 'background:#fef3c7;color:#92400e;padding:14px 20px;text-align:center;font-size:0.9rem;font-weight:600;';
+                faixa.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Este anúncio está fora do ar e não aparece nas buscas do guia.';
+                document.body.insertBefore(faixa, document.body.firstChild);
+            }
+
+            document.title = `${anuncio.titulo || 'Anúncio'} | Guia Comercial Buritis e Região`;
+            breadcrumb.innerHTML = `<a href="index.html">Início</a> <i class="fa-solid fa-chevron-right"></i> ${anuncio.categoria || ''} <i class="fa-solid fa-chevron-right"></i> ${anuncio.titulo || ''}`;
+
+            const whatsappLink = anuncio.whatsapp ? `https://wa.me/55${anuncio.whatsapp.replace(/\D/g, '')}` : '';
+            const telefoneLink = anuncio.telefone ? `tel:${anuncio.telefone.replace(/\D/g, '')}` : '';
+            // O endereço guardado vai até o bairro, sem a cidade — ela é
+            // coluna própria do anúncio. Para o mapa, porém, endereço sem
+            // cidade acha rua de nome parecido em outro estado, então a
+            // cidade e o UF entram aqui, só na busca.
+            const enderecoParaMapa = anuncio.endereco
+                ? `${anuncio.endereco}, ${anuncio.cidade || ''} - MG`.replace(/\s+-\s+MG$/, ' - MG')
+                : '';
+            const enderecoMapsLink = enderecoParaMapa ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoParaMapa)}` : '';
+            const mapaEmbedSrc = enderecoParaMapa ? `https://www.google.com/maps?q=${encodeURIComponent(enderecoParaMapa)}&output=embed` : '';
+            const instagramLink = anuncio.instagram ? (anuncio.instagram.startsWith('http') ? anuncio.instagram : 'https://instagram.com/' + anuncio.instagram.replace('@', '')) : '';
+
+            // O lojista pode digitar o link inteiro da fanpage ou só o
+            // nome dela. Aceitamos os dois: exigir o endereço completo
+            // faria muita gente colar errado e o botão não abrir nada.
+            const facebookLink = anuncio.facebook
+                ? (anuncio.facebook.startsWith('http') ? anuncio.facebook : 'https://facebook.com/' + anuncio.facebook.replace(/^@/, ''))
+                : '';
+
+            // Imagem principal: primeira foto da galeria; se não tiver fotos, usa a logo
+            const imagemPrincipal = (anuncio.fotos && anuncio.fotos.length > 0) ? anuncio.fotos[0] : (anuncio.imagem_url || 'https://via.placeholder.com/900x500?text=Sem+Imagem');
+
+            container.innerHTML = `
+                <div class="detalhe-wrapper">
+                    <!-- O título atravessa as duas colunas. Dentro da
+                         coluna da esquerda ele empurrava a foto para
+                         baixo, e a caixa de contato — que começa no topo
+                         da própria coluna — ficava mais alta que a foto,
+                         desalinhada. Aqui em cima, as duas comecam
+                         juntas embaixo dele. -->
+                    <div class="detalhe-titulo-bloco detalhe-titulo-bloco-top detalhe-titulo-largo">
+                        <h1>${anuncio.titulo || 'Estabelecimento'}</h1>
+                        <div class="detalhe-meta">
+                            ${anuncio.cidade ? `<span><i class="fa-solid fa-location-dot"></i> ${anuncio.cidade}</span>` : ''}
+                            <span><i class="fa-solid fa-eye"></i> ${anuncio.visualizacoes || 0} visualizações</span>
+                            ${anuncio.entrega ? '<span class="selo-entrega-detalhe"><i class="fa-solid fa-motorcycle"></i> FAZ ENTREGA</span>' : ''}
+                        </div>
+                    </div>
+
+                    <div class="detalhe-principal">
+                        <div class="detalhe-img-wrapper" id="detalheImgPrincipal" style="background-image: url('${imagemPrincipal}');" role="img" aria-label="${anuncio.titulo || 'Anúncio'}">
+                            <div class="detalhe-logo-badge" style="${anuncio.imagem_url ? `background-image: url('${anuncio.imagem_url}');` : ''}">
+                                ${!anuncio.imagem_url ? '<i class="fa-solid fa-store"></i>' : ''}
+                            </div>
+                            <span class="detalhe-cat-badge"><i class="fa-solid fa-tag"></i> ${anuncio.categoria || 'Geral'}</span>
+                        </div>
+
+                        ${anuncio.fotos && anuncio.fotos.length > 1 ? `
+                            <div class="detalhe-thumb-strip">
+                                ${anuncio.fotos.map((foto, i) => `<img src="${foto}" alt="Foto ${i + 1}" class="${foto === imagemPrincipal ? 'ativa' : ''}" onclick="trocarImagemPrincipal('${foto}', this)">`).join('')}
+                            </div>` : ''}
+
+                        <div class="detalhe-sobre">
+                            <h2>Sobre:</h2>
+                            <p class="detalhe-descricao">${anuncio.descricao || 'Este anunciante ainda não adicionou uma descrição.'}</p>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-sticky-wrap">
+                        <aside class="contato-card">
+                            <div class="contato-header">
+                                <div class="contato-logo" style="${anuncio.imagem_url ? `background-image: url('${anuncio.imagem_url}');` : ''}"></div>
+                                <h3>${anuncio.titulo || 'Estabelecimento'}</h3>
+                            </div>
+
+                            <hr class="contato-divider">
+
+                            ${anuncio.endereco ? `
+                                <div class="contato-item">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    <a href="${enderecoMapsLink}" target="_blank" rel="noopener">${anuncio.endereco}</a>
+                                </div>` : ''}
+                            ${anuncio.telefone ? `
+                                <div class="contato-item">
+                                    <i class="fa-solid fa-phone"></i>
+                                    <a href="${telefoneLink}">${anuncio.telefone}</a>
+                                </div>` : ''}
+
+                            <div class="contato-actions">
+                                ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" rel="noopener" onclick="registrarCliqueWhats('${id}')" class="contato-btn btn-whats"><i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp</a>` : ''}
+                                ${telefoneLink ? `<a href="${telefoneLink}" class="contato-btn btn-call"><i class="fa-solid fa-phone"></i> Ligar agora</a>` : ''}
+                                ${anuncio.site ? `<a href="${anuncio.site}" target="_blank" rel="noopener" class="contato-btn btn-site"><i class="fa-solid fa-globe"></i> Ver site</a>` : ''}
+                            </div>
+
+                            ${instagramLink || facebookLink ? `
+                                <div class="contato-social">
+                                    ${instagramLink ? `<a href="${instagramLink}" target="_blank" rel="noopener" title="Instagram"><i class="fa-brands fa-instagram"></i></a>` : ''}
+                                    ${facebookLink ? `<a href="${facebookLink}" target="_blank" rel="noopener" title="Facebook"><i class="fa-brands fa-facebook"></i></a>` : ''}
+                                </div>` : ''}
+
+                            <div class="contato-stats" id="contatoStats">
+                                <i class="fa-brands fa-whatsapp"></i> <span id="contadorCliquesWhats">${anuncio.cliques_whatsapp || 0}</span> pessoas já chamaram no WhatsApp
+                            </div>
+                        </aside>
+
+                        ${montarCaixaHorario(anuncio.horarios)}
+                    </div>
+
+                    ${anuncio.endereco ? `
+                        <div class="detalhe-mapa-secao">
+                            <div class="detalhe-mapa-bloco">
+                                <h2>Localização</h2>
+                                <div class="detalhe-mapa-frame">
+                                    <iframe src="${mapaEmbedSrc}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                                </div>
+                            </div>
+                        </div>` : ''}
+                </div>
+            `;
+        }
+
+        // ===== Monta a caixa de horário de funcionamento com status "aberto agora" =====
+        const DIAS_SEMANA_VIEW = [
+            { chave: 'seg', label: 'Segunda' },
+            { chave: 'ter', label: 'Terça' },
+            { chave: 'qua', label: 'Quarta' },
+            { chave: 'qui', label: 'Quinta' },
+            { chave: 'sex', label: 'Sexta' },
+            { chave: 'sab', label: 'Sábado' },
+            { chave: 'dom', label: 'Domingo' }
+        ];
+
+        function montarCaixaHorario(horarios) {
+            if (!horarios || Object.keys(horarios).length === 0) return '';
+
+            const agora = new Date();
+            const diaAtualIndex = agora.getDay(); // 0 = domingo
+            const mapaIndexParaChave = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+            const chaveHoje = mapaIndexParaChave[diaAtualIndex];
+
+            // A conta mora em assets/js/loja.js, junto com a do card
+            // da vitrine: as duas telas precisam dizer a mesma coisa
+            // no mesmo minuto.
+            const statusAberto = window.LOJA.estaAbertaAgora(horarios, agora) === true;
+
+            const linhas = DIAS_SEMANA_VIEW.map(dia => {
+                const h = horarios[dia.chave];
+                const classeHoje = dia.chave === chaveHoje ? 'dia-hoje' : '';
+                const valor = (h && h.aberto) ? `${h.abre} às ${h.fecha}` : `<span class="horario-fechado-label">Fechado</span>`;
+                return `<div class="horario-linha-view ${classeHoje}"><span>${dia.label}</span><span>${valor}</span></div>`;
+            }).join('');
+
+            return `
+                <div class="horario-card">
+                    <div class="horario-card-header">
+                        <i class="fa-solid fa-clock"></i>
+                        <h3>HORÁRIO DE FUNCIONAMENTO</h3>
+                    </div>
+                    <div class="horario-status ${statusAberto ? 'aberto' : 'fechado'}">
+                        <i class="fa-solid fa-circle" style="font-size: 0.55rem;"></i> ${statusAberto ? 'Aberto agora' : 'Fechado agora'}
+                    </div>
+                    ${linhas}
+                </div>
+            `;
+        }
+
+        async function registrarCliqueWhats(id) {
+            // A soma acontece dentro do banco, pelo mesmo motivo das
+            // visualizações. E somar lá também não perde contagem quando
+            // duas pessoas clicam no zap da mesma loja no mesmo segundo —
+            // ler o total aqui e devolver ler+1 perderia uma das duas.
+            const { error } = await supabaseClient.rpc('registrar_clique_whatsapp', { p_anuncio: id });
+            if (error) return;
+
+            // Na tela, só adianta o número que já está à vista. O valor de
+            // verdade é o do banco, e ele aparece no próximo carregamento.
+            const contador = document.getElementById('contadorCliquesWhats');
+            if (contador) contador.textContent = (parseInt(contador.textContent, 10) || 0) + 1;
+        }
+
+        // Troca a imagem principal ao clicar em uma miniatura
+        function trocarImagemPrincipal(url, elementoClicado) {
+            const principal = document.getElementById('detalheImgPrincipal');
+            if (principal) principal.style.backgroundImage = `url('${url}')`;
+            document.querySelectorAll('.detalhe-thumb-strip img').forEach(img => img.classList.remove('ativa'));
+            if (elementoClicado) elementoClicado.classList.add('ativa');
+        }
+
+        carregarDetalheAnuncio();
+    </script>
+</body>
+</html>
