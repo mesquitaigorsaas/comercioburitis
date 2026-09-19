@@ -445,14 +445,6 @@
                         </div>
                     </div>
 
-                    <!-- Táxi e moto táxi têm cadastro próprio: mais
-                         curto, e sem cobrança nenhuma. A caixa fica no
-                         fim porque é exceção — quem não é taxista passa
-                         reto sem precisar entender o que ela significa. -->
-                    <label class="opcao-taxi" for="reg-taxi">
-                        <span>SOU DA CATEGORIA TÁXI / MOTO TÁXI</span>
-                        <input type="checkbox" id="reg-taxi">
-                    </label>
 
                     <p class="form-secao">Acesso</p>
 
@@ -953,13 +945,8 @@
             }
 
             // Monta a próxima URL levando o plano escolhido para o
-            // cadastro do comércio. Quem marcou a caixa de táxi vai por
-            // outro caminho: leva a categoria em vez do plano, porque
-            // essa categoria não paga e não escolhe plano nenhum.
-            const ehTaxi = document.getElementById('reg-taxi').checked;
-            const parametro = ehTaxi
-                ? '?categoria=taxi'
-                : (planoEscolhido ? '?plano=' + encodeURIComponent(planoEscolhido) : '');
+            // cadastro do comércio.
+            const parametro = (planoEscolhido ? '?plano=' + encodeURIComponent(planoEscolhido) : '');
             const proximaUrl = '../dashboard/cadastrar-anuncio.html' + parametro;
 
             if (data.session) {

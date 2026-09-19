@@ -404,10 +404,10 @@
         .cat-casa { background-color: #eab308; }
         .cat-gastro { background-color: #a855f7; }
         .cat-imoveis { background-color: #f97316; }
-        .cat-taxi { background-color: #ec4899; }
+        .cat-academia { background-color: #ec4899; }
         .cat-pet { background-color: #14b8a6; }
-        .cat-sorvete { background-color: #6366f1; }
-        .cat-agro { background-color: #a16207; }
+        .cat-restaurante { background-color: #6366f1; }
+        .cat-mercado { background-color: #e11d74; }
 
         /* 4. LISTAGEM DE ANÚNCIOS DA CIDADE */
         .listings-section {
@@ -782,21 +782,6 @@
         </div>
     </header>
 
-    <section class="faixa-promocao" id="faixaPromocao">
-        <div class="container">
-            <p>
-                CADASTRE SUA LOJA GRÁTIS
-                <span>até 30/09/2026 — sem cartão, sem cobrança</span>
-            </p>
-            <!-- Vai direto para o cadastro, e não para os planos: enquanto
-                 a promoção vale não há o que escolher nem o que pagar, e
-                 mostrar uma tabela de preços a quem acabou de ler "grátis"
-                 só faz a pessoa desconfiar e desistir.
-                 Esta faixa some sozinha em 01/10/2026 (a data está em
-                 assets/js/regras.js), e o caminho curto morre com ela. -->
-            <a href="auth/cadastro.html">QUERO ANUNCIAR</a>
-        </div>
-    </section>
 
     <section class="banner-carousel-section">
         <div class="banner-wrapper">
@@ -846,38 +831,43 @@
 
                     <select name="categoria" id="searchCategoria">
                         <option value="">Todas as Categorias</option>
-                        <option value="Academias e Esportes">Academias e Esportes</option>
+                        <option value="Academias, Pilates e Esportes">Academias, Pilates e Esportes</option>
                         <option value="Advocacia e Contabilidade">Advocacia e Contabilidade</option>
-                        <option value="Agropecuária">Agropecuária</option>
-                        <option value="Alimentação e Gastronomia">Alimentação e Gastronomia</option>
-                        <option value="Assistência Técnica e Consertos">Assistência Técnica e Consertos</option>
+                        <option value="Arquitetura e Design de Interiores">Arquitetura e Design de Interiores</option>
                         <option value="Automotivo e Peças">Automotivo e Peças</option>
-                        <option value="Bares e Distribuidoras">Bares e Distribuidoras</option>
+                        <option value="Barbearias">Barbearias</option>
+                        <option value="Bares, Adegas e Distribuidoras">Bares, Adegas e Distribuidoras</option>
                         <option value="Beleza e Estética">Beleza e Estética</option>
+                        <option value="Cafeterias, Doces e Confeitaria">Cafeterias, Doces e Confeitaria</option>
                         <option value="Casa, Construção e Reformas">Casa, Construção e Reformas</option>
-                        <option value="Celular e acessórios">Celular e acessórios</option>
-                        <option value="Clínicas, Médicos e Dentistas">Clínicas, Médicos e Dentistas</option>
-                        <option value="Comércio e Compras">Comércio e Compras</option>
-                        <option value="Cursos e Educação">Cursos e Educação</option>
-                        <option value="Dentista - Dental">Dentista - Dental</option>
+                        <option value="Celular e Acessórios">Celular e Acessórios</option>
+                        <option value="Clínicas e Médicos">Clínicas e Médicos</option>
+                        <option value="Cursos e Idiomas">Cursos e Idiomas</option>
+                        <option value="Dentistas">Dentistas</option>
+                        <option value="Escolas, Creches e Reforço">Escolas, Creches e Reforço</option>
+                        <option value="Estética Automotiva e Lava-jato">Estética Automotiva e Lava-jato</option>
                         <option value="Eventos e Festas">Eventos e Festas</option>
-                        <option value="Farmácias e Saúde">Farmácias e Saúde</option>
+                        <option value="Farmácias, Saúde">Farmácias, Saúde</option>
                         <option value="Fretes e Mudanças">Fretes e Mudanças</option>
+                        <option value="Hortifruti, Açougue e Empórios">Hortifruti, Açougue e Empórios</option>
                         <option value="Imóveis e Imobiliárias">Imóveis e Imobiliárias</option>
+                        <option value="Informática e Tecnologia">Informática e Tecnologia</option>
                         <option value="Lanche, Pizza e outros">Lanche, Pizza e outros</option>
-                        <option value="Limpeza e Manutenção">Limpeza e Manutenção</option>
-                        <option value="Mercados e Hortifruti">Mercados e Hortifruti</option>
+                        <option value="Lavanderias e Costura">Lavanderias e Costura</option>
                         <option value="Moda Feminina">Moda Feminina</option>
+                        <option value="Moda Infantil">Moda Infantil</option>
                         <option value="Moda Masculina">Moda Masculina</option>
-                        <option value="Moda Unissex">Moda Unissex</option>
                         <option value="Móveis e Decoração">Móveis e Decoração</option>
-                        <option value="Padarias">Padarias</option>
+                        <option value="Óticas, Joias e Relógios">Óticas, Joias e Relógios</option>
                         <option value="Pet Shop e Veterinária">Pet Shop e Veterinária</option>
-                        <option value="Serviços Gerais e Manutenção">Serviços Gerais e Manutenção</option>
+                        <option value="Restaurantes e Gastronomia">Restaurantes e Gastronomia</option>
+                        <option value="Serviços Gerais, Limpeza e Manutenção">Serviços Gerais, Limpeza e Manutenção</option>
+                        <option value="Serviços para Condomínio">Serviços para Condomínio</option>
+                        <option value="Som Automotivo e Acessórios">Som Automotivo e Acessórios</option>
                         <option value="Sorvete, Açaí e Picolé">Sorvete, Açaí e Picolé</option>
+                        <option value="Supermercados e Padarias">Supermercados e Padarias</option>
                         <option value="Táxi e Moto Táxi">Táxi e Moto Táxi</option>
-                        <option value="Turismo e Hospedagem">Turismo e Hospedagem</option>
-                        <option value="Web e Tecnologia">Web e Tecnologia</option>
+                        <option value="Terapias e Bem-estar">Terapias e Bem-estar</option>
                     </select>
 
                     <button type="submit" class="btn-search">BUSCAR</button>
@@ -889,9 +879,9 @@
     <section class="categories-container">
         <div class="container">
             <div class="categories-grid">
-                <a onclick="filtrarCategoria('Agropecuária')" class="category-card cat-agro">
-                    <i class="fa-solid fa-tractor"></i>
-                    <span>Agropecuária</span>
+                <a onclick="filtrarCategoria('Supermercados e Padarias')" class="category-card cat-mercado">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Supermercados e Padarias</span>
                 </a>
                 <a onclick="filtrarCategoria('Automotivo e Peças')" class="category-card cat-auto">
                     <i class="fa-solid fa-car"></i>
@@ -908,9 +898,9 @@
                     </span>
                     <span class="rotulo-menor">Casa, Construção e Reformas</span>
                 </a>
-                <a onclick="filtrarCategoria('Farmácias e Saúde')" class="category-card cat-saude">
+                <a onclick="filtrarCategoria('Farmácias, Saúde')" class="category-card cat-saude">
                     <i class="fa-solid fa-user-doctor"></i>
-                    <span>Farmácia e Saúde</span>
+                    <span>Farmácias, Saúde</span>
                 </a>
                 <a onclick="filtrarCategoria('Imóveis e Imobiliárias')" class="category-card cat-imoveis">
                     <i class="fa-solid fa-house"></i>
@@ -940,13 +930,13 @@
                     <i class="fa-solid fa-dog"></i>
                     <span>Pet Shop</span>
                 </a>
-                <a onclick="filtrarCategoria('Sorvete, Açaí e Picolé')" class="category-card cat-sorvete">
-                    <i class="fa-solid fa-ice-cream"></i>
-                    <span>Sorvete e Açaí</span>
+                <a onclick="filtrarCategoria('Restaurantes e Gastronomia')" class="category-card cat-restaurante">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>Restaurantes</span>
                 </a>
-                <a onclick="filtrarCategoria('Táxi e Moto Táxi')" class="category-card cat-taxi">
-                    <i class="fa-solid fa-taxi"></i>
-                    <span>Táxi e Moto Táxi</span>
+                <a onclick="filtrarCategoria('Academias, Pilates e Esportes')" class="category-card cat-academia">
+                    <i class="fa-solid fa-dumbbell"></i>
+                    <span>Academias e Pilates</span>
                 </a>
             </div>
         </div>
@@ -1206,7 +1196,9 @@
                 // vitrine enquanto ela está fora do ar para os outros.
                 // Táxi não vence, e entra pela categoria.
                 if (comVencimento) {
-                    query = query.or(`vence_em.gte.${hoje},categoria.eq."${window.REGRAS.categoriaGratuita}"`);
+                    query = window.REGRAS.categoriaGratuita
+                        ? query.or(`vence_em.gte.${hoje},categoria.eq."${window.REGRAS.categoriaGratuita}"`)
+                        : query.gte('vence_em', hoje);
                 }
 
                 if (cidadeFiltro) {

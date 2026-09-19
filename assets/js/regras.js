@@ -1,40 +1,31 @@
 /* =====================================================================
    As regras comerciais do guia, num lugar só.
 
-   Até 30/09/2026 o cadastro é grátis. A partir de 01/10/2026 quem quer
-   anunciar escolhe e paga um plano.
+   No Buritis não há nada de graça: nem promoção de lançamento, nem
+   categoria isenta. Toda loja escolhe e paga um plano para entrar no ar.
 
-   Essa data decide duas coisas em telas diferentes: se a faixa laranja
-   da página inicial aparece, e quantas fotos o anunciante pode subir.
-   Se cada tela guardasse a própria cópia da data, bastaria mudar de
-   ideia uma vez para o site ficar dizendo duas coisas ao mesmo tempo —
-   faixa no ar prometendo grátis, formulário cobrando plano.
+   Os dois interruptores abaixo (gratisAte e categoriaGratuita) vieram
+   do guia de Alfenas e ficam desligados (null). O resto do site já
+   sabe se comportar com eles desligados.
 
    Mudou aqui, mudou no site inteiro.
    ===================================================================== */
 window.REGRAS = {
 
-    // Último instante da promoção. Depois disto a faixa some e o
-    // pagamento entra no caminho do cadastro.
-    gratisAte: new Date('2026-09-30T23:59:59'),
+    // Sem promoção de cadastro grátis. Para ligar uma no futuro, basta
+    // uma data aqui: new Date('AAAA-MM-DDT23:59:59').
+    gratisAte: null,
 
     promocaoValendo() {
-        return new Date() <= this.gratisAte;
+        return this.gratisAte !== null && new Date() <= this.gratisAte;
     },
 
-    // Táxi e moto táxi não pagam, nem agora nem depois da promoção.
-    // O guia banca essa categoria de propósito: transporte é o que o
-    // morador procura com pressa, e ter os telefones desde o primeiro
-    // dia vale mais para o guia do que a mensalidade de um taxista.
-    //
-    // Quem é dela não escolhe plano, não tem vencimento e não entra na
-    // contagem dos três meses. O cadastro também é outro, mais curto:
-    // nome, telefone e uma foto, porque taxista não tem vitrine, nem
-    // horário de funcionamento, nem endereço para o cliente visitar.
-    categoriaGratuita: 'Táxi e Moto Táxi',
+    // Nenhuma categoria é isenta: táxi e moto táxi pagam plano como
+    // qualquer loja. (Em Alfenas esta era 'Táxi e Moto Táxi'.)
+    categoriaGratuita: null,
 
     ehGratuita(categoria) {
-        return categoria === this.categoriaGratuita;
+        return this.categoriaGratuita !== null && categoria === this.categoriaGratuita;
     },
 
     // Uma foto, e opcional: costuma ser o carro ou o próprio motorista.

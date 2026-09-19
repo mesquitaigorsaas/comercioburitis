@@ -17,8 +17,8 @@ não está no ar — veja as pendências abaixo.
 3. **Domínio:** se houver, criar o arquivo `CNAME` com ele e conferir as
    origens liberadas em `supabase/functions/criar-pagamento/index.ts`
    (hoje: comercioburitis.com.br e mesquitaigorsaas.github.io/comercioburitis).
-4. **Data da promoção:** `gratisAte` em `assets/js/regras.js` ainda é
-   30/09/2026, herdada de Alfenas.
+4. **Nada de graça:** promoção e categoria gratuita já estão desligadas
+   (ver "Sem nada de graça" abaixo).
 5. **Imagens:** capa da página de planos (hoje é só texto) e o card do
    plano trimestral, que ainda mostra a igreja de Alfenas.
 6. **Banner da home:** hoje é um "anuncie aqui" em HTML; banner pago
@@ -89,21 +89,17 @@ grátis enquanto o formulário já cobrasse plano.
 
 ---
 
-## Promoção de lançamento
+## Sem nada de graça
 
-Até **30/09/2026** o cadastro é gratuito — a data que manda é
-`gratisAte`, em `assets/js/regras.js`:
+No Buritis não há promoção de lançamento nem categoria isenta (em
+Alfenas havia cadastro grátis até 30/09/2026 e táxi grátis). Toda loja
+escolhe e paga um plano para entrar no ar; as fotos dependem do plano
+(5, 10 ou 15).
 
-- 1 logomarca + 5 fotos por loja — as mesmas do plano trimestral, que
-  é como o cadastro da promoção é gravado: ninguém publica uma foto
-  agora para vê-la sumir quando a cobrança começar
-- os botões de cadastrar pulam a página de planos e vão direto ao
-  cadastro
-
-A partir de **01/10/2026** tudo isso se desliga sozinho: as faixas
-somem, os botões voltam a passar pelos planos e o limite de fotos
-passa a depender do plano contratado (5, 10 ou 15). Nada precisa ser
-editado no dia — basta a data virar.
+Os interruptores ficam em `assets/js/regras.js` (`gratisAte` e
+`categoriaGratuita`, ambos `null`) e, no banco, nas funções
+`promocao_valendo()` e `eh_categoria_gratuita()` do `013-pagamento.sql`,
+que devolvem `false`.
 
 ---
 
@@ -112,12 +108,9 @@ editado no dia — basta a data virar.
 Pix ou cartão (até 12x), pela página de pagamento do Mercado Pago
 (Checkout Pro), na mesma conta do Achei Água & Gás.
 
-- **Quem entrou na promoção** (até 30/09/2026) fica no ar até a data
-  que o painel já mostrava: cadastro + 3 meses. Depois, renova pagando.
-- **Quem se cadastra a partir de 01/10** nasce fora do ar. O cadastro
-  da loja termina na caixa de pagamento do painel, com o plano que a
-  pessoa escolheu já marcado. Pagou, entra no ar sozinha.
-- **Táxi e Moto Táxi** continuam grátis e sem vencimento.
+- **Toda loja nova** nasce fora do ar. O cadastro termina na caixa de
+  pagamento do painel, com o plano escolhido já marcado. Pagou, entra
+  no ar sozinha. Táxi e Moto Táxi também pagam.
 - **Destaque (R$ 120 / 15 dias)**: compra no painel, só para quem está
   no ar. Desliga sozinho de madrugada quando os 15 dias acabam.
 - **Pagou por fora** (Pix direto, dinheiro): no painel do

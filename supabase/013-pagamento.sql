@@ -53,7 +53,8 @@ returns boolean
 language sql
 immutable
 as $funcao$
-    select p_categoria = 'Táxi e Moto Táxi';
+    -- Buritis: nenhuma categoria é gratuita.
+    select false;
 $funcao$;
 
 create or replace function public.promocao_valendo()
@@ -61,7 +62,8 @@ returns boolean
 language sql
 stable
 as $funcao$
-    select public.hoje_no_brasil() <= date '2026-09-30';
+    -- Buritis: sem promoção de cadastro grátis.
+    select false;
 $funcao$;
 
 

@@ -52,7 +52,8 @@ const SITES = [
     "http://127.0.0.1:3000"
 ];
 
-const CATEGORIA_GRATUITA = "Táxi e Moto Táxi";
+// Buritis: nenhuma categoria é gratuita (em Alfenas era "Táxi e Moto Táxi").
+const CATEGORIA_GRATUITA: string | null = null;
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
