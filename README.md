@@ -135,8 +135,8 @@ Como funciona por dentro:
 3. **Funções:** na pasta do projeto, com o Supabase CLI logado:
 
    ```
-   npx supabase functions deploy criar-pagamento --no-verify-jwt --project-ref qnnjvgjtmdolwyxrgghp
-   npx supabase functions deploy webhook-mercadopago --no-verify-jwt --project-ref qnnjvgjtmdolwyxrgghp
+   npx supabase functions deploy criar-pagamento --no-verify-jwt --project-ref REF-DO-PROJETO-BURITIS
+   npx supabase functions deploy webhook-mercadopago --no-verify-jwt --project-ref REF-DO-PROJETO-BURITIS
    ```
 
 4. **Só depois dos três passos acima**, publique o site (`git push`). O
