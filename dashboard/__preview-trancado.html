@@ -1069,7 +1069,7 @@
 
         // ===== Verifica login; se tiver ?id= na URL, entra em modo de edição =====
         async function verificarAcesso() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const user = { id: "preview" }; // PREVIEW
 
             if (!user) {
                 alert('Você precisa estar logado para cadastrar um anúncio.');
@@ -1086,7 +1086,7 @@
             // a partir do painel de administração. Quem garante isso é o
             // banco (a regra "admin edita qualquer anuncio"); aqui só
             // perguntamos para saber como montar a tela.
-            const { data: ehAdmin } = await supabase.rpc('eh_admin');
+            const ehAdmin = false;
             souAdmin = ehAdmin === true;
 
             if (idParam) {
