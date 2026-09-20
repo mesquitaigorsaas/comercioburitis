@@ -223,6 +223,14 @@
             gap: 20px;
         }
 
+        /* A caixa do banner vem logo abaixo da do destaque, e a cor
+           laranja a separa: são produtos diferentes — um é lugar na
+           vitrine, o outro é a faixa do topo. */
+        .banner-box { margin-top: 20px; border-color: #fed7aa; }
+        .banner-icon { background-color: #ffedd5 !important; color: #ea580c !important; }
+        .btn-banner { background-color: #25d366 !important; color: #0f172a !important; }
+        .btn-banner:hover { background-color: #1eb955 !important; }
+
         .boost-icon {
             background-color: #fef08a;
             color: #ca8a04;
@@ -466,6 +474,32 @@
                 <div class="boost-price-action">
                     <div class="boost-price">R$ 120,00 <span>/ 15 dias</span></div>
                     <a href="auth/cadastro.html?add=especial" class="btn-boost">ADICIONAR DESTAQUE</a>
+                </div>
+            </div>
+
+            <!-- O banner do topo não entra no cadastro: são três espaços
+                 no site inteiro, e cada um é combinado por WhatsApp. Por
+                 isso a caixa leva para a conversa, e não para um botão de
+                 compra que prometeria um lugar que pode já estar ocupado.
+
+                 Se um dia forem mais de três, mude aqui e na página
+                 inicial — as duas telas têm de dizer o mesmo número. -->
+            <div class="special-boost-box banner-box">
+                <div class="boost-content">
+                    <div class="boost-icon banner-icon">
+                        <i class="fa-solid fa-rectangle-ad"></i>
+                    </div>
+                    <div class="boost-text">
+                        <h3>BANNER NO TOPO DO GUIA (apenas 3 espaços)</h3>
+                        <p>Sua marca na primeira tela de quem abre o guia, por 150 dias. São só três anunciantes, e o banner gira com os outros dois.</p>
+                    </div>
+                </div>
+                <div class="boost-price-action">
+                    <div class="boost-price">R$ 220,00 <span>/ 150 dias</span></div>
+                    <a href="https://wa.me/5531999347032?text=Ol%C3%A1!%20Quero%20um%20dos%203%20espa%C3%A7os%20de%20banner%20do%20Guia%20Comercial%20Buritis%20e%20Regi%C3%A3o."
+                       target="_blank" rel="noopener" class="btn-boost btn-banner">
+                        <i class="fa-brands fa-whatsapp"></i> FALAR SOBRE O BANNER
+                    </a>
                 </div>
             </div>
 
