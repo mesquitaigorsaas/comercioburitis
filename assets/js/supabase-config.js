@@ -21,10 +21,8 @@
 // do guia de Alfenas de propósito: com os valores de lá, cada cadastro
 // do Buritis cairia no banco de Alfenas.
 //
-// FALTA A CHAVE: copie a chave "anon public" em
-// Project Settings > API Keys e cole abaixo. Enquanto ela for o texto
-// de exemplo, o site abre mas não carrega loja nenhuma.
+// A chave abaixo é a "anon public", de Project Settings > API Keys.
 window.CONFIG_SUPABASE = {
     url: 'https://bjldjnucabkfmebazqxk.supabase.co',
-    chavePublica: 'COLE-AQUI-A-CHAVE-ANON'
+    chavePublica: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqbGRqbnVjYWJrZm1lYmF6cXhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MTQ1MTQsImV4cCI6MjEwNTQ5MDUxNH0.74hRwo7uGnbIT-Hf0mqiNTsuhDCK8q_GIGfZ6XhkKw8'
 };
