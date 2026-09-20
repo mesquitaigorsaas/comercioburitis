@@ -20,3 +20,6 @@ patrocinio.md
 
 # Previa temporaria gerada para teste local, nunca vai para o site
 dashboard/__preview-*.html
+
+# Qualquer previa gerada para teste local
+**/__preview-*.html

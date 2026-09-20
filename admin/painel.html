@@ -286,6 +286,27 @@
         .etiqueta.fora      { background: #fee2e2; color: #b91c1c; }
         .etiqueta.sem-loja  { background: #fef3c7; color: #92400e; }
 
+        /* Cortesia fica verde, e não cinza como os outros: é o botão
+           que coloca a loja no ar de graça, e olhar duas vezes antes de
+           clicar nele é o comportamento certo. */
+        .btn-cortesia {
+            margin-top: 6px;
+            border: 1px solid #86efac;
+            background: #f0fdf4;
+            color: #15803d;
+            font-family: inherit;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .btn-cortesia:hover { background: #dcfce7; border-color: #22c55e; }
+        .btn-cortesia:disabled { opacity: 0.6; cursor: progress; }
+
         .btn-alternar {
             border: 1px solid #cbd5e1;
             background: #ffffff;
@@ -1013,7 +1034,17 @@
                                     ${a.vence_em ? (vencido ? 'venceu em' : 'vence em') : 'sem pagamento'}
                                     <input type="date" class="vence-input" data-vence="${a.anuncio_id}" value="${a.vence_em || ''}"
                                            style="display:block; margin-top:2px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem;">
-                                </label>`;
+                                </label>
+                                <!-- Cortesia: o mesmo efeito de digitar a data na
+                                     mão, em um clique. Serve para a loja visitada
+                                     que entra no guia sem pagar (parceria, primeira
+                                     loja do bairro, acerto por fora). O prazo é o do
+                                     plano escolhido ao lado. -->
+                                <button type="button" class="btn-cortesia"
+                                        data-cortesia="${a.anuncio_id}"
+                                        title="Coloca no ar sem pagamento, pelo prazo do plano escolhido">
+                                    <i class="fa-solid fa-gift"></i> Cortesia
+                                </button>`;
                     })()}
                 </td>
 
@@ -1088,6 +1119,27 @@
     // e a barra de recado explica — em vez de a tela mostrar uma coisa
     // e o banco guardar outra.
     // ===================================================================
+    /**
+     * Soma meses sem estourar o fim do mês.
+     *
+     * O setMonth do JavaScript vira o mês sozinho quando o dia não
+     * existe no destino: 31 de março mais 3 meses cairia em 1º de
+     * julho, e a cortesia daria um dia a mais do que o combinado.
+     * Aqui o 31 vira o último dia do mês de destino.
+     */
+    function somarMeses(data, meses) {
+        const dia = data.getDate();
+        const resultado = new Date(data.getTime());
+
+        resultado.setDate(1);
+        resultado.setMonth(resultado.getMonth() + meses);
+
+        const ultimoDia = new Date(resultado.getFullYear(), resultado.getMonth() + 1, 0).getDate();
+        resultado.setDate(Math.min(dia, ultimoDia));
+
+        return resultado;
+    }
+
     async function salvarCampo(anuncioId, campo, valor, botao) {
         if (botao) botao.disabled = true;
 
@@ -1120,6 +1172,43 @@
             const ligado = btnAtivo.dataset.valor === 'true';
             const ok = await salvarCampo(btnAtivo.dataset.ativo, 'ativo', !ligado, btnAtivo);
             if (ok) recado('ok', ligado ? 'Anúncio tirado do ar.' : 'Anúncio de volta ao ar.');
+            return;
+        }
+
+        // ===== Cortesia =====
+        //
+        // Põe a loja no ar sem pagamento, pelo prazo do plano que está
+        // escolhido na mesma linha. É o caminho da loja visitada a pé,
+        // da parceria e do acerto por fora — tudo isso antes acabava em
+        // digitar a data à mão e errar o mês.
+        //
+        // A conta parte de hoje, e não do vencimento atual: cortesia
+        // dada duas vezes seguidas não deve empilhar prazo sem querer.
+        // Para esticar um prazo que ainda vale, o campo de data continua
+        // ali ao lado.
+        const btnCortesia = e.target.closest('[data-cortesia]');
+        if (btnCortesia) {
+            const anuncioId = btnCortesia.dataset.cortesia;
+            const loja = anunciantes.find((a) => a.anuncio_id === anuncioId);
+            const plano = (document.querySelector(`[data-plano="${anuncioId}"]`) || {}).value
+                || (loja && loja.plano) || 'trimestral';
+
+            const meses = { trimestral: 3, semestral: 6, anual: 12 }[plano] || 3;
+
+            const ate = somarMeses(new Date(), meses);
+            const data = ate.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+
+            const nome = (loja && loja.titulo) || 'esta loja';
+            if (!confirm(`Dar ${meses} meses de cortesia para ${nome}?\n\n`
+                + `Ela entra no ar agora, sem pagar, e fica até ${ate.toLocaleDateString('pt-BR')}.`)) {
+                return;
+            }
+
+            const ok = await salvarCampo(anuncioId, 'vence_em', data, btnCortesia);
+            if (ok) {
+                recado('ok', `Cortesia de ${meses} meses: no ar até ${ate.toLocaleDateString('pt-BR')}.`);
+                desenharTabela();
+            }
             return;
         }
 
