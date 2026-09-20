@@ -29,6 +29,42 @@ não está no ar — veja as pendências abaixo.
 Todas as lojas gravam cidade = `belo horizonte`; o bairro fica no
 endereço. O foco agora são Buritis, Estoril, Palmeiras, Havaí e Betânia.
 
+O guia **não separa por bairro**: quem está na divisa do Buritis com o
+Estoril quer o que está a 500 metros, e não o que tem o mesmo nome de
+bairro no cadastro. A busca é por distância — ver abaixo.
+
+---
+
+## Perto de mim
+
+No lugar do antigo seletor de bairro, a página inicial tem o botão
+**"Perto de mim"**: a vitrine passa a vir do mais perto para o mais
+longe, com a distância escrita em cada card ("450 m").
+
+São duas pontas:
+
+- **A loja ganha um ponto no mapa** quando se cadastra. O endereço vai
+  ao Nominatim (OpenStreetMap), que devolve latitude e longitude, e
+  elas ficam nas colunas criadas pelo `014-localizacao.sql`. É uma
+  consulta por loja, gratuita e sem cadastro; em troca o serviço pede
+  no máximo uma consulta por segundo e o crédito que está no rodapé.
+  Endereço que o mapa não conhece salva sem ponto, e a loja continua
+  aparecendo — só vai para o fim quando a busca for por distância.
+- **Quem procura é localizado pelo navegador**, com a permissão dele.
+  Quem recusa — ou está no computador, onde a localização erra por
+  quilômetros — digita o CEP, e ViaCEP + Nominatim resolvem.
+
+A conta de distância acontece **dentro do navegador de quem visita**. A
+localização da pessoa nunca é enviada ao banco e some quando ela fecha
+a aba. Isso está dito na tela, porque quase todo mundo que recusa a
+permissão recusa por desconfiança.
+
+A ordem: destaques pagos que estejam a até **2 km** primeiro, depois
+todo o resto por distância, e por último quem ainda não tem ponto no
+mapa. O raio está em `RAIO_DESTAQUE_KM`, em `assets/js/geo.js`. Sem
+localização, vale a ordem de sempre: destaques na frente, depois ordem
+de cadastro.
+
 ---
 
 ## Como funciona
@@ -68,6 +104,7 @@ E abra o endereço que ele mostrar.
 | `assets/js/menu.js` | Abre e fecha esse menu no celular |
 | `assets/js/supabase-config.js` | Endereço e chave pública do banco |
 | `assets/js/regras.js` | Datas e limites da promoção |
+| `assets/js/geo.js` | Distâncias, localização e o "perto de mim" |
 | `assets/js/menu-promocao.js` | Para onde aponta o botão de cadastrar |
 | `supabase/` | Os SQLs que montam o banco |
 

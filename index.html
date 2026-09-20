@@ -11,6 +11,7 @@
     
     <script src="assets/js/supabase-config.js"></script>
     <script src="assets/js/regras.js"></script>
+    <script src="assets/js/geo.js"></script>
     <script src="assets/js/menu-promocao.js"></script>
     <script src="assets/js/loja.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -287,6 +288,105 @@
 
         .btn-search:hover {
             background-color: #1d4ed8;
+        }
+
+        /* ===== "Perto de mim" =====
+           No lugar do antigo select de bairro. O guia inteiro cabe em
+           poucos bairros vizinhos, e quem procura está numa esquina:
+           o que vale é a distância, não o nome do bairro no cadastro. */
+        .btn-perto {
+            flex: 1 1 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 18px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #475569;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-perto:hover { border-color: #ff6a00; color: #ff6a00; }
+
+        /* Ligado: fundo laranja, para não restar dúvida de que a lista
+           abaixo mudou de ordem por causa deste botão. */
+        .btn-perto.ativo {
+            background-color: #ff6a00;
+            border-color: #ff6a00;
+            color: #ffffff;
+        }
+
+        .btn-perto[disabled] { opacity: 0.6; cursor: progress; }
+
+        .aviso-local {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            text-align: center;
+        }
+
+        /* O atributo hidden sozinho não segura quem tem display: flex —
+           o CSS vence, e a caixa aparecia na primeira tela. */
+        .aviso-local[hidden], .busca-cep[hidden] { display: none; }
+
+        .aviso-local button {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-size: 0.82rem;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        /* O caminho de quem não quer dar a localização, ou está no
+           computador, onde ela costuma errar por quilômetros. */
+        .busca-cep {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .busca-cep input {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            width: 150px;
+            outline: none;
+        }
+
+        .busca-cep button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* A distância no card, junto do nome da categoria. */
+        .listing-distancia {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 8px;
+            color: #ff6a00;
+            font-weight: 700;
         }
 
         /* 3. CATEGORIAS COLORIDAS FLUTUANTES */
@@ -819,15 +919,16 @@
             
             <div class="search-box-wrapper">
                 <form class="search-form" id="searchForm">
-                    <select name="cidade" id="searchCidade">
-                        <!-- O guia cobre o Buritis e os bairros vizinhos,
-                             todos em Belo Horizonte: a coluna "cidade" do
-                             banco guarda "belo horizonte", e o bairro fica
-                             no endereço. A segunda opção não é escolhível:
-                             está ali para dizer que virá mais. -->
-                        <option value="belo horizonte" selected>Buritis e região - BH</option>
-                        <option value="" disabled>Em breve mais bairros</option>
-                    </select>
+                    <!-- No lugar do antigo select de bairro. Quem está na
+                         divisa do Buritis com o Estoril quer o que está a
+                         500 metros, e não o que tem o mesmo nome de bairro
+                         no cadastro. O clique pede a localização ao
+                         navegador; a conta de distância acontece aqui
+                         dentro, e a localização não vai para o banco. -->
+                    <button type="button" class="btn-perto" id="btnPerto">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                        <span id="textoPerto">Perto de mim</span>
+                    </button>
 
                     <select name="categoria" id="searchCategoria">
                         <option value="">Todas as Categorias</option>
@@ -875,6 +976,20 @@
 
                     <button type="submit" class="btn-search">BUSCAR</button>
                 </form>
+
+                <!-- Nasce vazio: só ganha texto quando há o que dizer
+                     sobre a localização (procurando, achei, recusou). -->
+                <p class="aviso-local" id="avisoLocal" hidden></p>
+
+                <!-- A saída de quem recusou a permissão, ou está no
+                     computador — onde a localização do navegador erra
+                     por quilômetros. Aparece só nessa hora: oferecer
+                     dois caminhos de uma vez já na primeira tela faria
+                     a pessoa parar para escolher. -->
+                <div class="busca-cep" id="buscaCep" hidden>
+                    <input type="text" id="cepReferencia" placeholder="Seu CEP" inputmode="numeric" maxlength="9">
+                    <button type="button" id="btnUsarCep">USAR MEU CEP</button>
+                </div>
             </div>
         </div>
     </section>
@@ -965,6 +1080,9 @@
                 <a href="planos.html" class="btn-add-listing">+ CADASTRAR ANÚNCIO</a>
             </div>
             <p>&copy; 2026 Guia Comercial Buritis e Região. Todos os direitos reservados: <a href="https://mesquitasaas.online/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Mesquita SaaS</a>.</p>
+            <!-- O crédito é a contrapartida do uso gratuito do
+                 Nominatim, que localiza os endereços das lojas. -->
+            <p style="font-size:0.75rem;opacity:0.7;margin-top:6px;">Endereços localizados com dados do <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">OpenStreetMap</a>.</p>
         </div>
     </footer>
 
@@ -1049,11 +1167,124 @@
 
         // 2. Carregamento de Anúncios do Supabase
         const urlParams = new URLSearchParams(window.location.search);
-        const cidadeUrl = urlParams.get('cidade') || 'belo horizonte';
+
+        // O guia inteiro é de Belo Horizonte: Buritis e os bairros
+        // vizinhos. A cidade deixou de ser escolha na tela (era um
+        // select de uma opção só) e virou esta constante, que continua
+        // filtrando a busca no banco.
+        const CIDADE_DO_GUIA = 'belo horizonte';
+        const cidadeUrl = urlParams.get('cidade') || CIDADE_DO_GUIA;
         const categoriaUrl = urlParams.get('categoria') || '';
 
-        if(document.getElementById('searchCidade')) document.getElementById('searchCidade').value = cidadeUrl;
         if(document.getElementById('searchCategoria')) document.getElementById('searchCategoria').value = categoriaUrl;
+
+        // =============================================================
+        // PERTO DE MIM
+        //
+        // Onde está quem procura, para ordenar a vitrine por distância.
+        // Fica só nesta aba (GEO.guardar usa sessionStorage) e nunca é
+        // enviado ao banco: a conta acontece aqui no navegador.
+        // =============================================================
+        let localDeQuemProcura = window.GEO.guardado();
+
+        const botaoPerto = document.getElementById('btnPerto');
+        const textoPerto = document.getElementById('textoPerto');
+        const avisoLocal = document.getElementById('avisoLocal');
+        const buscaCep = document.getElementById('buscaCep');
+
+        function escreverAviso(html) {
+            if (!html) {
+                avisoLocal.hidden = true;
+                avisoLocal.innerHTML = '';
+                return;
+            }
+            avisoLocal.innerHTML = html;
+            avisoLocal.hidden = false;
+        }
+
+        function desenharEstadoDoLocal() {
+            const ligado = !!localDeQuemProcura;
+            botaoPerto.classList.toggle('ativo', ligado);
+            botaoPerto.disabled = false;
+            textoPerto.textContent = ligado ? 'Mais próximos de você' : 'Perto de mim';
+
+            if (!ligado) return;
+
+            const de = localDeQuemProcura.origem === 'cep'
+                ? `do CEP ${localDeQuemProcura.rotulo ? '(' + localDeQuemProcura.rotulo + ')' : ''}`
+                : 'de onde você está';
+
+            escreverAviso(
+                `<span><i class="fa-solid fa-circle-check" style="color:#16a34a"></i> `
+                + `Mostrando primeiro o que está mais perto ${de}.</span> `
+                + `<button type="button" id="btnDesligarPerto">ver a lista normal</button>`
+            );
+
+            document.getElementById('btnDesligarPerto').addEventListener('click', () => {
+                localDeQuemProcura = null;
+                window.GEO.esquecer();
+                buscaCep.hidden = true;
+                escreverAviso('');
+                desenharEstadoDoLocal();
+                carregarAnuncios(cidadeUrl, document.getElementById('searchCategoria').value);
+            });
+        }
+
+        botaoPerto.addEventListener('click', async () => {
+            // Segundo clique desliga, sem precisar procurar o link.
+            if (localDeQuemProcura) {
+                localDeQuemProcura = null;
+                window.GEO.esquecer();
+                escreverAviso('');
+                desenharEstadoDoLocal();
+                carregarAnuncios(cidadeUrl, document.getElementById('searchCategoria').value);
+                return;
+            }
+
+            botaoPerto.disabled = true;
+            textoPerto.textContent = 'Procurando você...';
+            escreverAviso('<span>Seu navegador vai pedir permissão. A sua localização fica no seu aparelho: ela não é enviada para o guia.</span>');
+
+            try {
+                localDeQuemProcura = await window.GEO.pedirLocalizacaoDoNavegador();
+                window.GEO.guardar(localDeQuemProcura);
+                buscaCep.hidden = true;
+                desenharEstadoDoLocal();
+                carregarAnuncios(cidadeUrl, document.getElementById('searchCategoria').value);
+            } catch (erro) {
+                // Recusar não é erro: é uma decisão. Em vez de insistir,
+                // o site oferece o caminho do CEP, que não depende de
+                // permissão nenhuma.
+                desenharEstadoDoLocal();
+                escreverAviso(`<span>${erro.message} Se quiser, use o seu CEP:</span>`);
+                buscaCep.hidden = false;
+                document.getElementById('cepReferencia').focus();
+            }
+        });
+
+        document.getElementById('btnUsarCep').addEventListener('click', async () => {
+            const campo = document.getElementById('cepReferencia');
+            const botao = document.getElementById('btnUsarCep');
+
+            botao.disabled = true;
+            botao.textContent = 'PROCURANDO...';
+
+            try {
+                localDeQuemProcura = await window.GEO.coordenadasDoCep(campo.value);
+                window.GEO.guardar(localDeQuemProcura);
+                buscaCep.hidden = true;
+                desenharEstadoDoLocal();
+                carregarAnuncios(cidadeUrl, document.getElementById('searchCategoria').value);
+            } catch (erro) {
+                escreverAviso(`<span>${erro.message}</span>`);
+            } finally {
+                botao.disabled = false;
+                botao.textContent = 'USAR MEU CEP';
+            }
+        });
+
+        // Quem já tinha dado a localização nesta aba volta com ela.
+        desenharEstadoDoLocal();
 
         // ===== O pé do card =====
         //
@@ -1061,6 +1292,18 @@
         // loja que nunca preencheu horário, ou um botão de mapa que abre
         // uma busca vazia, valem menos que espaço em branco: ensinam
         // quem procura a desconfiar do guia inteiro.
+        // A distância só aparece quando ela existe de verdade: sem
+        // localização de quem procura, ou sem ponto no mapa da loja,
+        // o card fica como sempre foi. Um "-- km" no lugar ensinaria
+        // quem procura a desconfiar do número quando ele aparecer.
+        function montarDistancia(anuncio) {
+            if (!localDeQuemProcura || anuncio._distanciaKm === null
+                || anuncio._distanciaKm === undefined) return '';
+
+            return `<span class="listing-distancia"><i class="fa-solid fa-location-dot"></i> `
+                + `${window.GEO.formatarDistancia(anuncio._distanciaKm)}</span>`;
+        }
+
         function montarPeDoCard(anuncio) {
             const partes = [];
 
@@ -1258,6 +1501,14 @@
 
                 if (error) throw error;
 
+                // A ordem por distância entra aqui, depois do banco:
+                // quem decide é o navegador, que é o único que sabe
+                // onde a pessoa está. Sem localização, fica a ordem que
+                // o banco mandou (destaques na frente, depois por data).
+                if (localDeQuemProcura && data && data.length) {
+                    data = window.GEO.ordenarPorDistancia(data, localDeQuemProcura);
+                }
+
                 montarCabecalhoDaListagem(categoriaFiltro, data ? data.length : 0);
 
                 if (!data || data.length === 0) {
@@ -1277,7 +1528,7 @@ card.innerHTML = `
         </div>
         <div class="listing-body">
             <h3 class="listing-title">${anuncio.titulo}</h3>
-            <p class="listing-category"><i class="fa-solid fa-tag"></i> ${anuncio.categoria}</p>
+            <p class="listing-category"><i class="fa-solid fa-tag"></i> ${anuncio.categoria}${montarDistancia(anuncio)}</p>
             <p class="listing-description">${anuncio.descricao ? anuncio.descricao.substring(0, 90) + '...' : ''}</p>
         </div>
     </a>
@@ -1297,17 +1548,18 @@ card.innerHTML = `
 
         document.getElementById('searchForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const cidade = document.getElementById('searchCidade').value;
             const categoria = document.getElementById('searchCategoria').value;
-            window.location.href = `index.html?cidade=${encodeURIComponent(cidade)}&categoria=${encodeURIComponent(categoria)}#anuncios`;
+            // A cidade saiu do endereço junto com o select: o guia é de
+            // Belo Horizonte inteiro e sempre foi. A localização de quem
+            // procura fica guardada na aba, então ela sobrevive a esta
+            // troca de página e a ordem por distância continua valendo.
+            window.location.href = `index.html?categoria=${encodeURIComponent(categoria)}#anuncios`;
         });
     </script>
 
     <script>
         function filtrarCategoria(nomeCategoria) {
-            const selectCidade = document.getElementById('searchCidade');
-            let cidade = (selectCidade && selectCidade.value) ? selectCidade.value : 'belo horizonte';
-            window.location.href = `index.html?cidade=${encodeURIComponent(cidade)}&categoria=${encodeURIComponent(nomeCategoria)}#anuncios`;
+            window.location.href = `index.html?categoria=${encodeURIComponent(nomeCategoria)}#anuncios`;
         }
     </script>
 
