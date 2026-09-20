@@ -26,8 +26,8 @@ não está no ar — veja as pendências abaixo.
 
 ### Como a região funciona
 
-Todas as lojas gravam cidade = `belo horizonte`; o bairro (Buritis,
-Estoril, Palmeiras, Havaí...) fica no endereço.
+Todas as lojas gravam cidade = `belo horizonte`; o bairro fica no
+endereço. O foco agora são Buritis, Estoril, Palmeiras, Havaí e Betânia.
 
 ---
 
