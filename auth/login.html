@@ -392,7 +392,23 @@
             setLoading(btn, false);
 
             if (error) {
-                showAlert('error', 'E-mail ou senha incorretos. Tente novamente.');
+                // Antes, qualquer falha virava "e-mail ou senha
+                // incorretos". Quem tinha a senha certa e só não havia
+                // confirmado o e-mail ficava tentando a senha de novo,
+                // sem chance de acertar — o problema estava na caixa de
+                // entrada, e a tela não dizia isso.
+                const motivo = (error.message || '').toLowerCase();
+
+                if (motivo.includes('not confirmed')) {
+                    showAlert('error', 'Falta confirmar seu e-mail. Procure a mensagem '
+                        + 'do Guia Comercial Buritis na sua caixa de entrada (e no spam) '
+                        + 'e clique no link dela.');
+                } else if (motivo.includes('rate limit') || motivo.includes('too many')) {
+                    showAlert('error', 'Muitas tentativas seguidas. Espere alguns minutos '
+                        + 'e tente de novo.');
+                } else {
+                    showAlert('error', 'E-mail ou senha incorretos. Tente novamente.');
+                }
                 return;
             }
 
