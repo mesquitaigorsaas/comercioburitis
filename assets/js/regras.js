@@ -80,6 +80,26 @@ window.REGRAS = {
         return doPlano[recurso] === true;
     },
 
+    // Do mais barato para o mais caro. A ordem importa: é ela que
+    // responde "a partir de qual plano isto liga?".
+    ordemDosPlanos: ['trimestral', 'semestral', 'anual'],
+
+    /**
+     * O plano mais barato que dá este recurso, ou null se nenhum dá.
+     *
+     * Serve para o cadeado do formulário dizer o nome certo — "só no
+     * plano Anual" convence mais do que "não disponível", porque a
+     * pessoa fica sabendo o que fazer para ter aquilo.
+     */
+    planoQueLibera(recurso) {
+        return this.ordemDosPlanos.find((plano) => this.temRecurso(plano, recurso)) || null;
+    },
+
+    nomeDoPlano(plano) {
+        const nomes = { trimestral: 'Trimestral', semestral: 'Semestral', anual: 'Anual' };
+        return nomes[plano] || plano || '';
+    },
+
     // "Anúncios em destaque", na página inicial, não tem teto: são
     // quatro por fileira e quantas fileiras forem precisas.
     //

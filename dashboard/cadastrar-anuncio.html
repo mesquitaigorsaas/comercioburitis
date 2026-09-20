@@ -146,6 +146,38 @@
         }
         .form-hint { color: #64748b; font-size: 0.8rem; margin-top: 5px; }
 
+        /* ===== O que o plano não dá =====
+           Fica à vista, apagado e sem poder digitar. Esconder seria
+           mais limpo, mas ninguém troca de plano por causa de um campo
+           que nunca viu: aqui a pessoa vê o que está perdendo e o nome
+           do plano que libera. */
+        .bloco-trancado {
+            position: relative;
+            border: 1px dashed #fdba74;
+            border-radius: 8px;
+            background: #fff8f2;
+            padding: 14px;
+        }
+
+        /* O conteúdo trancado fica apagado, mas o selo acima dele não —
+           é ele que a pessoa tem de ler. */
+        .bloco-trancado > *:not(.selo-plano) { opacity: 0.45; }
+        .bloco-trancado input,
+        .bloco-trancado select { cursor: not-allowed; }
+
+        .selo-plano {
+            display: block;
+            font-size: 0.82rem;
+            color: #9a3412;
+            background: #ffedd5;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+        }
+
+        .selo-plano i { margin-right: 6px; }
+        .selo-plano a { color: #c2410c; font-weight: 700; }
+
         /* Sim ou não, um ao lado do outro.
 
            Dois botões, e não uma caixinha sozinha: caixa desmarcada
@@ -809,35 +841,42 @@
         }
 
         /**
-         * O formulário obedece ao plano contratado.
+         * O formulário obedece ao plano contratado — mostrando, e não
+         * escondendo, o que o plano não dá.
          *
-         * O horário de funcionamento só existe no anual, então pedir as
-         * sete linhas de horário a quem está no trimestral é tomar o
-         * tempo da pessoa para guardar um dado que não vai aparecer.
+         * Esconder seria mais limpo, mas ensina menos: quem está no
+         * trimestral nunca veria que existe horário de funcionamento,
+         * e ninguém troca de plano por uma coisa que não sabe que
+         * existe. Com o campo à vista e cadeado em cima, a pessoa vê o
+         * que perde e o nome do plano que libera aquilo.
          *
-         * O WhatsApp continua sendo pedido em todos os planos: ele é
-         * como o guia fala com o lojista, e o número não é público.
-         * Só o botão de chamar é que depende do plano — e o aviso ao
-         * lado do campo diz isso, para ninguém descobrir depois.
+         * O WhatsApp é a exceção: o campo continua aberto em todos os
+         * planos, porque é por ele que o guia fala com o lojista. Só o
+         * botão público depende do plano, e o aviso diz isso.
          */
         function aplicarRecursosDoPlano() {
             const tem = (recurso) => window.REGRAS.temRecurso(planoDaLoja, recurso);
             const gratuita = window.REGRAS.ehGratuita(categoriaDaLoja());
 
-            const secaoHorarios = document.getElementById('secaoHorarios');
-            if (secaoHorarios && !gratuita) {
-                secaoHorarios.style.display = tem('horarios') ? '' : 'none';
-            }
+            // Na categoria gratuita a seção inteira já saiu da tela por
+            // outro motivo (táxi não abre e fecha), e o cadeado não tem
+            // o que trancar.
+            if (!gratuita) {
+                trancar(
+                    document.getElementById('secaoHorarios'),
+                    tem('horarios'),
+                    'horarios',
+                    'Horário de funcionamento'
+                );
 
-            // Instagram, Facebook e site somem juntos: na página de
-            // planos eles são uma linha só ("Link Para Redes Sociais e
-            // Site"), e pedir o perfil que não vai aparecer é prometer
-            // com o formulário o que o plano não dá.
-            ['instagram', 'facebook', 'site'].forEach((id) => {
-                const campo = document.getElementById(id);
-                const bloco = campo && campo.closest('.form-group');
-                if (bloco && !gratuita) bloco.style.display = tem('links') ? '' : 'none';
-            });
+                // Instagram, Facebook e site andam juntos: na página de
+                // planos eles são uma linha só ("Link Para Redes Sociais
+                // e Site").
+                ['instagram', 'facebook', 'site'].forEach((id) => {
+                    const campo = document.getElementById(id);
+                    trancar(campo && campo.closest('.form-group'), tem('links'), 'links', 'Este link');
+                });
+            }
 
             const campoWhats = document.getElementById('whatsapp');
             if (campoWhats) {
@@ -851,13 +890,49 @@
                         aviso.innerHTML = '<i class="fa-solid fa-lock"></i> '
                             + 'No seu plano o botão "Chamar no WhatsApp" não aparece '
                             + 'para quem visita. O número fica guardado só para o guia '
-                            + 'falar com você. Para liberar o botão, troque de plano.';
+                            + 'falar com você. '
+                            + `<a href="../planos.html" target="_blank" rel="noopener">Ver planos</a>.`;
                         campoWhats.parentNode.appendChild(aviso);
                     }
                     aviso.style.display = '';
                 } else if (aviso) {
                     aviso.style.display = 'none';
                 }
+            }
+        }
+
+        /**
+         * Deixa um pedaço do formulário à vista, porém trancado.
+         *
+         * Os campos de dentro ficam desabilitados: campo desabilitado
+         * não é enviado pela validação do navegador nem atrapalha o
+         * envio, e o que já estava gravado continua lá — quem trocar de
+         * plano reencontra o que tinha preenchido antes, em vez de
+         * começar do zero.
+         */
+        function trancar(bloco, liberado, recurso, oQue) {
+            if (!bloco) return;
+
+            bloco.classList.toggle('bloco-trancado', !liberado);
+            bloco.querySelectorAll('input, select, textarea, button').forEach((campo) => {
+                campo.disabled = !liberado;
+            });
+
+            let selo = bloco.querySelector('.selo-plano');
+
+            if (liberado) {
+                if (selo) selo.remove();
+                return;
+            }
+
+            if (!selo) {
+                const plano = window.REGRAS.nomeDoPlano(window.REGRAS.planoQueLibera(recurso));
+                selo = document.createElement('p');
+                selo.className = 'selo-plano';
+                selo.innerHTML = `<i class="fa-solid fa-lock"></i> ${oQue} aparece para quem visita `
+                    + `a partir do plano <strong>${plano}</strong>. `
+                    + `<a href="../planos.html" target="_blank" rel="noopener">Trocar de plano</a>`;
+                bloco.prepend(selo);
             }
         }
 
