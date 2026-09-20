@@ -35,11 +35,11 @@ const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN") ?? "";
 // Os mesmos valores de planos.html. Os de lá só desenham a tela;
 // quem cobra são estes.
 const PLANOS: Record<string, { valor: number; titulo: string }> = {
-    trimestral: { valor: 29.7, titulo: "Guia Buritis — Plano Trimestral (3 meses) | Mesquita SaaS" },
-    semestral: { valor: 53.46, titulo: "Guia Buritis — Plano Semestral (6 meses) | Mesquita SaaS" },
-    anual: { valor: 100.98, titulo: "Guia Buritis — Plano Anual (12 meses) | Mesquita SaaS" }
+    trimestral: { valor: 29.7, titulo: "Mesquita SaaS — Guia Buritis | Plano Trimestral (3 meses)" },
+    semestral: { valor: 53.46, titulo: "Mesquita SaaS — Guia Buritis | Plano Semestral (6 meses)" },
+    anual: { valor: 100.98, titulo: "Mesquita SaaS — Guia Buritis | Plano Anual (12 meses)" }
 };
-const DESTAQUE = { valor: 120, titulo: "Guia Buritis — Destaque por 15 dias | Mesquita SaaS" };
+const DESTAQUE = { valor: 120, titulo: "Mesquita SaaS — Guia Buritis | Destaque por 15 dias" };
 
 // Para onde o Mercado Pago devolve a pessoa depois de pagar. Só estes
 // endereços: se viesse livre do navegador, dava para usar o botão de
@@ -158,10 +158,11 @@ Deno.serve(async (req) => {
                 installments: 12
             },
             // O que sai na fatura do cartão (limite de 22 caracteres).
-            // É o nome da empresa, e não o do guia: quem vende é a mesma
-            // empresa em todos os guias, e é esse nome que dá credibilidade.
-            // Em compensação, o título do item acima leva os dois nomes —
-            // quem não reconhecer a fatura acha o guia pelo e-mail da compra.
+            //
+            // É a marca, e não o guia: a Mesquita SaaS vende vários
+            // serviços (este guia, o de Alfenas, o Achei Água & Gás), e
+            // é ela que assina a cobrança em todos. Qual serviço foi
+            // pago aparece no título do item, acima.
             statement_descriptor: "MESQUITA SAAS"
         };
 
