@@ -17,12 +17,14 @@
    A senha do banco NÃO está aqui e nunca deve estar. Ela vive só no
    painel do Supabase, e de lá pode ser redefinida quando for preciso.
    ===================================================================== */
-// PENDENTE: o Buritis precisa do PRÓPRIO projeto no Supabase. Estes dois
-// valores ainda estão vazios de propósito — com os do guia de Alfenas,
-// cada cadastro do Buritis cairia no banco de Alfenas.
-// Crie o projeto, rode os SQLs de supabase/ e cole aqui a URL e a
-// chave anon (Project Settings > API).
+// Projeto do Buritis, na conta comercioburitisbh@gmail.com — separado
+// do guia de Alfenas de propósito: com os valores de lá, cada cadastro
+// do Buritis cairia no banco de Alfenas.
+//
+// FALTA A CHAVE: copie a chave "anon public" em
+// Project Settings > API Keys e cole abaixo. Enquanto ela for o texto
+// de exemplo, o site abre mas não carrega loja nenhuma.
 window.CONFIG_SUPABASE = {
-    url: 'https://SEU-PROJETO.supabase.co',
+    url: 'https://bjldjnucabkfmebazqxk.supabase.co',
     chavePublica: 'COLE-AQUI-A-CHAVE-ANON'
 };

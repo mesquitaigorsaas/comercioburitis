@@ -9,19 +9,25 @@ não está no ar — veja as pendências abaixo.
 
 ## Pendências para colocar no ar
 
-1. **Supabase próprio:** criar um projeto novo, rodar os SQLs de
-   `supabase/` na ordem e colar URL + chave anon em
-   `assets/js/supabase-config.js`. Trocar também o `--project-ref` dos
-   comandos de deploy mais abaixo.
-2. **Repositório / GitHub Pages:** criar o repositório `comercioburitis`.
-3. **Domínio:** se houver, criar o arquivo `CNAME` com ele e conferir as
+1. **Chave do Supabase:** o projeto já existe
+   (`bjldjnucabkfmebazqxk`, conta comercioburitisbh@gmail.com) e a URL
+   dele já está em `assets/js/supabase-config.js`. Falta colar ali a
+   chave **anon public**, de Project Settings → API Keys.
+2. **Montar o banco:** SQL Editor → cole `supabase/rodar-tudo.sql` →
+   Run. São os 14 arquivos de `supabase/` na ordem certa, num só.
+   Depois, crie a sua conta no site e rode o comando do fim daquele
+   arquivo, que diz quem é o administrador.
+3. **Repositório / GitHub Pages:** o repositório `comercioburitis` já
+   existe e está vazio. Depois do primeiro `push`, em Settings → Pages,
+   escolher a branch `main` e a pasta `/(root)`.
+4. **Domínio:** se houver, criar o arquivo `CNAME` com ele e conferir as
    origens liberadas em `supabase/functions/criar-pagamento/index.ts`
    (hoje: comercioburitis.com.br e mesquitaigorsaas.github.io/comercioburitis).
-4. **Nada de graça:** promoção e categoria gratuita já estão desligadas
+5. **Nada de graça:** promoção e categoria gratuita já estão desligadas
    (ver "Sem nada de graça" abaixo).
-5. **Imagens:** capa da página de planos (hoje é só texto) e o card do
+6. **Imagens:** capa da página de planos (hoje é só texto) e o card do
    plano trimestral, que ainda mostra a igreja de Alfenas.
-6. **Banner da home:** hoje é um "anuncie aqui" em HTML; banner pago
+7. **Banner da home:** hoje é um "anuncie aqui" em HTML; banner pago
    entra em 2188x718 no lugar dele, em `index.html`.
 
 ### Como a região funciona
@@ -172,8 +178,8 @@ Como funciona por dentro:
 3. **Funções:** na pasta do projeto, com o Supabase CLI logado:
 
    ```
-   npx supabase functions deploy criar-pagamento --no-verify-jwt --project-ref REF-DO-PROJETO-BURITIS
-   npx supabase functions deploy webhook-mercadopago --no-verify-jwt --project-ref REF-DO-PROJETO-BURITIS
+   npx supabase functions deploy criar-pagamento --no-verify-jwt --project-ref bjldjnucabkfmebazqxk
+   npx supabase functions deploy webhook-mercadopago --no-verify-jwt --project-ref bjldjnucabkfmebazqxk
    ```
 
 4. **Só depois dos três passos acima**, publique o site (`git push`). O
