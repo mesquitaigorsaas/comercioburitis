@@ -1973,15 +1973,19 @@ select count(*) filter (where latitude is not null) as com_mapa,
 -- =====================================================================
 -- >>> POR ÚLTIMO: QUEM É O ADMINISTRADOR
 --
--- Só depois de criar a sua conta no site (auth/cadastro.html), com o
--- e-mail do guia. Tire os dois tracinhos das duas linhas abaixo, troque
--- o e-mail se for outro, e rode.
+-- Só depois de criar a conta no site (auth/cadastro.html) com o e-mail
+-- abaixo. Tire os dois tracinhos das três linhas do insert e rode.
+--
+-- O administrador é sempre mesquitaigor.saas@gmail.com, o mesmo
+-- dos outros guias: quem entra no painel é o dono do projeto, e não a
+-- conta de serviço do guia (comercioburitisbh@gmail.com), que existe
+-- para o Supabase e para os e-mails do site.
 --
 -- Sem isso ninguém entra no painel de administração — nem você.
 -- =====================================================================
 
 -- insert into public.admins (id)
--- select id from auth.users where email = comercioburitisbh@gmail.com
+-- select id from auth.users where email = 'mesquitaigor.saas@gmail.com'
 -- on conflict (id) do nothing;
 
 -- select u.email from public.admins a join auth.users u on u.id = a.id;

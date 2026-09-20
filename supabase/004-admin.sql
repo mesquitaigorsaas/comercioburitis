@@ -191,8 +191,9 @@ grant execute on function public.admin_listar_anunciantes() to authenticated;
 -- ---------------------------------------------------------------------
 -- 5. DIGA QUEM É O ADMINISTRADOR
 --
--- Tire o comentário da linha abaixo, troque pelo e-mail da conta que
--- você usa PARA ENTRAR NO SITE (não a do Supabase) e rode.
+-- Tire o comentário da linha abaixo e rode. O e-mail é o da conta que
+-- você usa PARA ENTRAR NO SITE (não a do Supabase): nos guias, é
+-- sempre mesquitaigor.saas@gmail.com.
 --
 -- Precisa ser uma conta já criada em auth/cadastro.html. Se o e-mail
 -- não existir, o comando não faz nada e não avisa — por isso vem o
@@ -200,7 +201,7 @@ grant execute on function public.admin_listar_anunciantes() to authenticated;
 -- ---------------------------------------------------------------------
 
 -- insert into public.admins (id)
--- select id from auth.users where email = 'troque@pelo.seu.email'
+-- select id from auth.users where email = 'mesquitaigor.saas@gmail.com'
 -- on conflict (id) do nothing;
 
 -- select u.email, a.criado_em from public.admins a join auth.users u on u.id = a.id;

@@ -15,8 +15,11 @@ não está no ar — veja as pendências abaixo.
    chave **anon public**, de Project Settings → API Keys.
 2. **Montar o banco:** SQL Editor → cole `supabase/rodar-tudo.sql` →
    Run. São os 14 arquivos de `supabase/` na ordem certa, num só.
-   Depois, crie a sua conta no site e rode o comando do fim daquele
-   arquivo, que diz quem é o administrador.
+   Depois, crie a conta de **mesquitaigor.saas@gmail.com** pelo próprio
+   site e rode o comando do fim daquele arquivo, que é o que diz quem é
+   o administrador. Esse e-mail é o administrador de todos os guias; a
+   conta comercioburitisbh@gmail.com é só do Supabase e dos e-mails do
+   site, e não entra no painel.
 3. **Repositório / GitHub Pages:** o repositório `comercioburitis` já
    existe e está vazio. Depois do primeiro `push`, em Settings → Pages,
    escolher a branch `main` e a pasta `/(root)`.
