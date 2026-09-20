@@ -805,6 +805,60 @@
             }
 
             escreverLimiteDeFotos();
+            aplicarRecursosDoPlano();
+        }
+
+        /**
+         * O formulário obedece ao plano contratado.
+         *
+         * O horário de funcionamento só existe no anual, então pedir as
+         * sete linhas de horário a quem está no trimestral é tomar o
+         * tempo da pessoa para guardar um dado que não vai aparecer.
+         *
+         * O WhatsApp continua sendo pedido em todos os planos: ele é
+         * como o guia fala com o lojista, e o número não é público.
+         * Só o botão de chamar é que depende do plano — e o aviso ao
+         * lado do campo diz isso, para ninguém descobrir depois.
+         */
+        function aplicarRecursosDoPlano() {
+            const tem = (recurso) => window.REGRAS.temRecurso(planoDaLoja, recurso);
+            const gratuita = window.REGRAS.ehGratuita(categoriaDaLoja());
+
+            const secaoHorarios = document.getElementById('secaoHorarios');
+            if (secaoHorarios && !gratuita) {
+                secaoHorarios.style.display = tem('horarios') ? '' : 'none';
+            }
+
+            // Instagram, Facebook e site somem juntos: na página de
+            // planos eles são uma linha só ("Link Para Redes Sociais e
+            // Site"), e pedir o perfil que não vai aparecer é prometer
+            // com o formulário o que o plano não dá.
+            ['instagram', 'facebook', 'site'].forEach((id) => {
+                const campo = document.getElementById(id);
+                const bloco = campo && campo.closest('.form-group');
+                if (bloco && !gratuita) bloco.style.display = tem('links') ? '' : 'none';
+            });
+
+            const campoWhats = document.getElementById('whatsapp');
+            if (campoWhats) {
+                let aviso = document.getElementById('avisoWhatsPlano');
+
+                if (!tem('whatsapp')) {
+                    if (!aviso) {
+                        aviso = document.createElement('p');
+                        aviso.id = 'avisoWhatsPlano';
+                        aviso.className = 'form-hint';
+                        aviso.innerHTML = '<i class="fa-solid fa-lock"></i> '
+                            + 'No seu plano o botão "Chamar no WhatsApp" não aparece '
+                            + 'para quem visita. O número fica guardado só para o guia '
+                            + 'falar com você. Para liberar o botão, troque de plano.';
+                        campoWhats.parentNode.appendChild(aviso);
+                    }
+                    aviso.style.display = '';
+                } else if (aviso) {
+                    aviso.style.display = 'none';
+                }
+            }
         }
 
         const limiteDeFotos = () => window.REGRAS.limiteDeFotos(planoDaLoja, categoriaDaLoja());

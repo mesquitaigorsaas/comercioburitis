@@ -1306,7 +1306,13 @@
         function montarPeDoCard(anuncio) {
             const partes = [];
 
-            const aberta = window.LOJA.estaAbertaAgora(anuncio.horarios);
+            // Três recursos dependem do plano contratado (a tabela está
+            // em regras.js, e tem de dizer o mesmo que os cards da
+            // planos.html). O dado continua no banco — só não aparece
+            // para quem não pagou por ele.
+            const tem = (recurso) => window.REGRAS.temRecurso(anuncio.plano, recurso);
+
+            const aberta = tem('horarios') ? window.LOJA.estaAbertaAgora(anuncio.horarios) : null;
             if (aberta !== null) {
                 partes.push(aberta
                     ? '<span class="selo selo-aberto"><i class="fa-solid fa-circle"></i> ABERTO</span>'
@@ -1319,7 +1325,7 @@
 
             const acoes = [];
 
-            const whats = window.LOJA.linkWhatsapp(anuncio.whatsapp);
+            const whats = tem('whatsapp') ? window.LOJA.linkWhatsapp(anuncio.whatsapp) : '';
             if (whats) {
                 // O data-anuncio é lido pelo container na hora do clique,
                 // para somar o mesmo contador que a página da loja soma.
@@ -1328,7 +1334,7 @@
                     title="Chamar no WhatsApp" aria-label="Chamar ${anuncio.titulo} no WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>`);
             }
 
-            const mapa = window.LOJA.linkMapa(anuncio.endereco, anuncio.cidade);
+            const mapa = tem('mapa') ? window.LOJA.linkMapa(anuncio.endereco, anuncio.cidade) : '';
             if (mapa) {
                 acoes.push(`<a href="${mapa}" target="_blank" rel="noopener"
                     class="acao-mapa" title="Ver no Google Maps"

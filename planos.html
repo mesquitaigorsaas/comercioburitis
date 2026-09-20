@@ -151,6 +151,16 @@
             font-size: 0.85rem;
         }
 
+        /* O que o plano NÃO tem continua na lista, apagado e com o X
+           vermelho. Some da lista, some da comparação: quem lê só os
+           "sim" de um card não percebe o que está deixando de levar —
+           e é justamente isso que faz o plano de cima valer a pena. */
+        .plan-features li.sem {
+            color: #94a3b8;
+        }
+
+        .plan-features li.sem i { color: #ef4444; }
+
         /* A economia do anual em reais, e não em porcentagem: "R$ 17,82"
            é dinheiro que a pessoa enxerga no bolso. A conta é 12 meses do
            trimestral (R$ 118,80) menos o anual (R$ 100,98). */
@@ -391,12 +401,12 @@
                     <div class="plan-card-body">
                         <ul class="plan-features">
                             <li><i class="fa-solid fa-check"></i> Validade : 3 Meses</li>
-                            <li><i class="fa-solid fa-check"></i> Link Para Redes Sociais e Site : Sim</li>
-                            <li><i class="fa-solid fa-check"></i> Contato direto para WhatsApp : Sim</li>
-                            <li><i class="fa-solid fa-check"></i> Endereço localizado no Google Maps : Sim</li>
+                            <li class="sem"><i class="fa-solid fa-xmark"></i> Link Para Redes Sociais e Site : Não</li>
+                            <li class="sem"><i class="fa-solid fa-xmark"></i> Contato direto para WhatsApp : Não</li>
+                            <li class="sem"><i class="fa-solid fa-xmark"></i> Endereço com localização no Google Maps : Não</li>
                             <li><i class="fa-solid fa-check"></i> Quant. De Imagens : 5</li>
                             <li><i class="fa-solid fa-check"></i> Espaço para logomarca : Sim</li>
-                            <li><i class="fa-solid fa-check"></i> Horário De Funcionamento : Sim</li>
+                            <li class="sem"><i class="fa-solid fa-xmark"></i> Horário De Funcionamento : Não</li>
                         </ul>
                         <a href="auth/cadastro.html?plano=trimestral" class="btn-choose">CONTRATAR PLANO</a>
                     </div>
@@ -412,10 +422,10 @@
                             <li><i class="fa-solid fa-check"></i> Validade : 6 Meses</li>
                             <li><i class="fa-solid fa-check"></i> Link Para Redes Sociais e Site : Sim</li>
                             <li><i class="fa-solid fa-check"></i> Contato direto para WhatsApp : Sim</li>
-                            <li><i class="fa-solid fa-check"></i> Endereço localizado no Google Maps : Sim</li>
+                            <li class="sem"><i class="fa-solid fa-xmark"></i> Endereço com localização no Google Maps : Não</li>
                             <li><i class="fa-solid fa-check"></i> Quant. De Imagens : 10</li>
                             <li><i class="fa-solid fa-check"></i> Espaço para logomarca : Sim</li>
-                            <li><i class="fa-solid fa-check"></i> Horário De Funcionamento : Sim</li>
+                            <li class="sem"><i class="fa-solid fa-xmark"></i> Horário De Funcionamento : Não</li>
                         </ul>
                         <a href="auth/cadastro.html?plano=semestral" class="btn-choose">CONTRATAR PLANO</a>
                     </div>
@@ -432,7 +442,7 @@
                             <li><i class="fa-solid fa-check"></i> Validade : 12 Meses</li>
                             <li><i class="fa-solid fa-check"></i> Link Para Redes Sociais e Site : Sim</li>
                             <li><i class="fa-solid fa-check"></i> Contato direto para WhatsApp : Sim</li>
-                            <li><i class="fa-solid fa-check"></i> Endereço localizado no Google Maps : Sim</li>
+                            <li><i class="fa-solid fa-check"></i> Endereço com localização no Google Maps : Sim</li>
                             <li><i class="fa-solid fa-check"></i> Quant. De Imagens : 15</li>
                             <li><i class="fa-solid fa-check"></i> Espaço para logomarca : Sim</li>
                             <li><i class="fa-solid fa-check"></i> Horário De Funcionamento : Sim</li>

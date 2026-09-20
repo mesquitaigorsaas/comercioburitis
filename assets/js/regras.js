@@ -47,6 +47,39 @@ window.REGRAS = {
         anual: 15
     },
 
+    // ===== O que cada plano mostra na loja =====
+    //
+    // Só o número de fotos não sustentava a diferença de preço: cinco
+    // fotos bastam para quase toda loja, e quem percebe isso fica no
+    // trimestral para sempre. Estes três recursos são o que o morador
+    // realmente usa — chamar no WhatsApp, achar o endereço no mapa e
+    // saber se está aberto agora — e por isso são eles que separam os
+    // planos.
+    //
+    // Esta tabela tem de dizer exatamente o mesmo que os cards da
+    // planos.html. Se as duas discordarem, o guia cobra por uma coisa
+    // e entrega outra.
+    recursosPorPlano: {
+        trimestral: { whatsapp: false, mapa: false, horarios: false, links: false },
+        semestral:  { whatsapp: true,  mapa: false, horarios: false, links: true },
+        anual:      { whatsapp: true,  mapa: true,  horarios: true,  links: true }
+    },
+
+    /**
+     * Esta loja mostra este recurso?
+     * ('whatsapp', 'mapa', 'horarios', 'links' — Instagram, Facebook e site)
+     *
+     * Plano desconhecido ou em branco mostra tudo. Isso acontece com
+     * anúncio criado pelo administrador à mão, e cortar recurso de uma
+     * loja por causa de um campo vazio no banco seria punir o lojista
+     * por um descuido nosso. Na dúvida, entrega a mais.
+     */
+    temRecurso(plano, recurso) {
+        const doPlano = this.recursosPorPlano[plano];
+        if (!doPlano) return true;
+        return doPlano[recurso] === true;
+    },
+
     // "Anúncios em destaque", na página inicial, não tem teto: são
     // quatro por fileira e quantas fileiras forem precisas.
     //

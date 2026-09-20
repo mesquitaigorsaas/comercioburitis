@@ -149,6 +149,39 @@ que devolvem `false`.
 
 ---
 
+## O que cada plano mostra
+
+Só o número de fotos não sustentava a diferença de preço: cinco fotos
+bastam para quase toda loja, e quem percebe isso fica no trimestral
+para sempre. O que separa os planos são os recursos que o morador de
+fato usa.
+
+| | Trimestral | Semestral | Anual |
+|---|---|---|---|
+| Fotos | 5 | 10 | 15 |
+| Logomarca | sim | sim | sim |
+| Links (Instagram, Facebook, site) | **não** | sim | sim |
+| Botão "Chamar no WhatsApp" | **não** | sim | sim |
+| Endereço com localização no Google Maps | **não** | **não** | sim |
+| Horário de funcionamento | **não** | **não** | sim |
+
+O endereço em texto aparece em todos os planos — o que se paga é o
+atalho para o mapa. O WhatsApp continua sendo pedido no cadastro de
+todo mundo, porque é por ele que o guia fala com o lojista; só o botão
+público é que depende do plano, e o formulário avisa isso na tela.
+
+A tabela que manda é `recursosPorPlano`, em `assets/js/regras.js`.
+Quem a consulta: a vitrine (`index.html`), a página da loja
+(`anuncio-detalhes.html`) e o formulário do anúncio. **Mudou ali, mude
+também os cards da `planos.html`** — se as duas discordarem, o guia
+cobra por uma coisa e entrega outra.
+
+Plano em branco mostra tudo, de propósito: é o caso do anúncio criado
+à mão pelo administrador, e cortar recurso por um campo vazio seria
+punir o lojista por descuido nosso.
+
+---
+
 ## Cobrança dos planos
 
 Pix ou cartão (até 12x), pela página de pagamento do Mercado Pago

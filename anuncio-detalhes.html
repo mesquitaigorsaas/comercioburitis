@@ -380,25 +380,37 @@
             document.title = `${anuncio.titulo || 'Anúncio'} | Guia Comercial Buritis e Região`;
             breadcrumb.innerHTML = `<a href="index.html">Início</a> <i class="fa-solid fa-chevron-right"></i> ${anuncio.categoria || ''} <i class="fa-solid fa-chevron-right"></i> ${anuncio.titulo || ''}`;
 
-            const whatsappLink = anuncio.whatsapp ? `https://wa.me/55${anuncio.whatsapp.replace(/\D/g, '')}` : '';
+            // Três recursos dependem do plano (a tabela está em
+            // regras.js, e tem de dizer o mesmo que os cards da
+            // planos.html): o botão do WhatsApp, o endereço clicável
+            // com o mapa e a caixa de horário. O dado continua gravado
+            // — só não aparece para quem não pagou por ele.
+            const tem = (recurso) => window.REGRAS.temRecurso(anuncio.plano, recurso);
+
+            const whatsappLink = (tem('whatsapp') && anuncio.whatsapp) ? `https://wa.me/55${anuncio.whatsapp.replace(/\D/g, '')}` : '';
             const telefoneLink = anuncio.telefone ? `tel:${anuncio.telefone.replace(/\D/g, '')}` : '';
             // O endereço guardado vai até o bairro, sem a cidade — ela é
             // coluna própria do anúncio. Para o mapa, porém, endereço sem
             // cidade acha rua de nome parecido em outro estado, então a
             // cidade e o UF entram aqui, só na busca.
-            const enderecoParaMapa = anuncio.endereco
+            const enderecoParaMapa = (tem('mapa') && anuncio.endereco)
                 ? `${anuncio.endereco}, ${anuncio.cidade || ''} - MG`.replace(/\s+-\s+MG$/, ' - MG')
                 : '';
             const enderecoMapsLink = enderecoParaMapa ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoParaMapa)}` : '';
             const mapaEmbedSrc = enderecoParaMapa ? `https://www.google.com/maps?q=${encodeURIComponent(enderecoParaMapa)}&output=embed` : '';
-            const instagramLink = anuncio.instagram ? (anuncio.instagram.startsWith('http') ? anuncio.instagram : 'https://instagram.com/' + anuncio.instagram.replace('@', '')) : '';
+            const instagramLink = (tem('links') && anuncio.instagram) ? (anuncio.instagram.startsWith('http') ? anuncio.instagram : 'https://instagram.com/' + anuncio.instagram.replace('@', '')) : '';
 
             // O lojista pode digitar o link inteiro da fanpage ou só o
             // nome dela. Aceitamos os dois: exigir o endereço completo
             // faria muita gente colar errado e o botão não abrir nada.
-            const facebookLink = anuncio.facebook
+            const facebookLink = (tem('links') && anuncio.facebook)
                 ? (anuncio.facebook.startsWith('http') ? anuncio.facebook : 'https://facebook.com/' + anuncio.facebook.replace(/^@/, ''))
                 : '';
+
+            // O site entra pela mesma porta das redes sociais: os três
+            // são "Link Para Redes Sociais e Site" na página de planos,
+            // e ou vão juntos, ou não vão.
+            const siteLink = (tem('links') && anuncio.site) ? anuncio.site : '';
 
             // Imagem principal: primeira foto da galeria; se não tiver fotos, usa a logo
             const imagemPrincipal = (anuncio.fotos && anuncio.fotos.length > 0) ? anuncio.fotos[0] : (anuncio.imagem_url || 'https://via.placeholder.com/900x500?text=Sem+Imagem');
@@ -451,7 +463,12 @@
                             ${anuncio.endereco ? `
                                 <div class="contato-item">
                                     <i class="fa-solid fa-location-dot"></i>
-                                    <a href="${enderecoMapsLink}" target="_blank" rel="noopener">${anuncio.endereco}</a>
+                                    ${enderecoMapsLink
+                                        ? `<a href="${enderecoMapsLink}" target="_blank" rel="noopener">${anuncio.endereco}</a>`
+                                        /* Sem o mapa no plano, o endereço continua escrito:
+                                           ele é do lojista e ajuda quem procura. O que o
+                                           plano paga é o atalho para o Google Maps. */
+                                        : `<span>${anuncio.endereco}</span>`}
                                 </div>` : ''}
                             ${anuncio.telefone ? `
                                 <div class="contato-item">
@@ -462,7 +479,7 @@
                             <div class="contato-actions">
                                 ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" rel="noopener" onclick="registrarCliqueWhats('${id}')" class="contato-btn btn-whats"><i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp</a>` : ''}
                                 ${telefoneLink ? `<a href="${telefoneLink}" class="contato-btn btn-call"><i class="fa-solid fa-phone"></i> Ligar agora</a>` : ''}
-                                ${anuncio.site ? `<a href="${anuncio.site}" target="_blank" rel="noopener" class="contato-btn btn-site"><i class="fa-solid fa-globe"></i> Ver site</a>` : ''}
+                                ${siteLink ? `<a href="${siteLink}" target="_blank" rel="noopener" class="contato-btn btn-site"><i class="fa-solid fa-globe"></i> Ver site</a>` : ''}
                             </div>
 
                             ${instagramLink || facebookLink ? `
@@ -471,15 +488,16 @@
                                     ${facebookLink ? `<a href="${facebookLink}" target="_blank" rel="noopener" title="Facebook"><i class="fa-brands fa-facebook"></i></a>` : ''}
                                 </div>` : ''}
 
-                            <div class="contato-stats" id="contatoStats">
-                                <i class="fa-brands fa-whatsapp"></i> <span id="contadorCliquesWhats">${anuncio.cliques_whatsapp || 0}</span> pessoas já chamaram no WhatsApp
-                            </div>
+                            ${whatsappLink ? `
+                                <div class="contato-stats" id="contatoStats">
+                                    <i class="fa-brands fa-whatsapp"></i> <span id="contadorCliquesWhats">${anuncio.cliques_whatsapp || 0}</span> pessoas já chamaram no WhatsApp
+                                </div>` : ''}
                         </aside>
 
-                        ${montarCaixaHorario(anuncio.horarios)}
+                        ${tem('horarios') ? montarCaixaHorario(anuncio.horarios) : ''}
                     </div>
 
-                    ${anuncio.endereco ? `
+                    ${mapaEmbedSrc ? `
                         <div class="detalhe-mapa-secao">
                             <div class="detalhe-mapa-bloco">
                                 <h2>Localização</h2>
