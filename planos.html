@@ -28,34 +28,62 @@
         }
 
         /* 2. HERO / BANNER DA PÁGINA PLANOS */
-        /* Faixa escura com o texto de verdade, em todas as telas. A capa
-           em imagem do guia de Alfenas mostrava a cidade de lá; até sair
-           uma capa do Buritis, o texto faz o papel dela. */
+        /* A foto do letreiro do Buritis, com o texto escrito por cima em
+           HTML, e não dentro da imagem. Assim o Google e o leitor de tela
+           leem o título, e trocar a frase não exige refazer a arte.
+
+           O letreiro está no lado esquerdo da foto, então o texto vai
+           para a direita, onde ela já é escura. O degradê reforça esse
+           escuro: sem ele, uma nuvem clara come a palavra. */
         .plans-hero {
-            background:
-                radial-gradient(circle at 90% 20%, rgba(236, 25, 107, 0.35), transparent 40%),
-                linear-gradient(120deg, #18181b 0%, #27272a 60%, #7c2d12 130%);
+            background-image:
+                linear-gradient(90deg, rgba(24, 24, 27, 0.10) 0%, rgba(24, 24, 27, 0.45) 45%, rgba(24, 24, 27, 0.88) 78%),
+                url('assets/img/CapaPlanos.jpg');
+            background-size: cover;
+            background-position: center;
             color: #ffffff;
-            text-align: center;
+            text-align: right;
         }
 
         .capa-texto {
             line-height: 1.5;
-            padding: 50px 20px;
+            padding: 90px 20px;
         }
 
-        .capa-frase { color: #e4e4e7 !important; margin-bottom: 10px; }
+        /* No celular a capa vira uma tarja estreita: o letreiro quase não
+           aparece, e quem precisa continuar legível é o texto. */
+        @media (max-width: 768px) {
+            .plans-hero {
+                background-image:
+                    linear-gradient(180deg, rgba(24, 24, 27, 0.55) 0%, rgba(24, 24, 27, 0.85) 100%),
+                    url('assets/img/CapaPlanos.jpg');
+                background-position: 72% center;
+                text-align: center;
+            }
+
+            .capa-texto { padding: 55px 20px; }
+        }
+
+        .capa-frase { color: #f4f4f5 !important; margin-bottom: 10px; }
         .capa-frase strong { color: #ff6a00; display: block; margin-top: 4px; letter-spacing: .5px; }
 
         .plans-hero h1 {
             font-size: 2.2rem;
             font-weight: 700;
             margin-bottom: 8px;
+            /* Presa à direita: solta, a frase atravessaria a foto e
+               passaria por cima do letreiro. */
+            max-width: 620px;
+            margin-left: auto;
+            /* Sobre foto, texto sem sombra some assim que passa uma nuvem
+               clara atrás dele. */
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
         }
 
         .plans-hero p {
-            color: #a1a1aa;
+            color: #d4d4d8;
             font-size: 0.9rem;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
         }
 
         .plans-hero p a {
@@ -94,34 +122,81 @@
             border: 2px solid #2563eb;
         }
 
-        /* O topo do card é a imagem do plano, e nada mais: preço, nome,
-           valor por mês e selos já vêm desenhados dentro dela.
+        /* O topo do card é a foto do bairro, com o preço escrito por cima
+           em HTML.
 
-           A imagem entra inteira, sem corte: cortar pelas bordas, como
-           fazia o fundo, comeria justamente o preço e os selos quando o
-           card estreitasse. */
+           Antes o preço vinha desenhado dentro da imagem, e isso custava
+           três coisas: trocar valor exigia refazer a arte, o Google e o
+           leitor de tela não liam o número, e no celular ele encolhia
+           junto com a foto até ficar ilegível. */
         .plan-card-header {
+            position: relative;
             background-color: #27272a;
-            line-height: 0;
+            aspect-ratio: 1400 / 490;
         }
 
         .plan-card-header img {
             display: block;
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover;
         }
 
-        /* Preço e nome continuam escritos na página, mas invisíveis:
-           leitor de tela e buscador não leem texto que está dentro de
-           uma imagem, e sem isto o plano ficaria mudo para os dois. */
-        .so-para-leitor {
+        .plan-card-preco {
             position: absolute;
-            width: 1px;
-            height: 1px;
-            overflow: hidden;
-            clip-path: inset(50%);
-            white-space: nowrap;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            padding: 0 14px;
+            color: #ffffff;
+            text-align: center;
+            /* As fotos já vêm escurecidas, mas a sombra garante o preço
+               legível no trecho claro de qualquer uma delas. */
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
         }
+
+        .plan-card-preco .valor {
+            font-size: clamp(1.9rem, 6vw, 2.6rem);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* Os centavos menores, como numa etiqueta de vitrine. */
+        .plan-card-preco .valor span { font-size: 0.55em; }
+
+        .plan-card-preco .nome {
+            font-size: clamp(0.85rem, 2.4vw, 1.05rem);
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .plan-card-preco .mes {
+            background: rgba(15, 23, 42, 0.55);
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: clamp(0.7rem, 1.9vw, 0.85rem);
+            color: #e4e4e7;
+        }
+
+        .plan-card-preco .mes strong { color: #ff8a3d; }
+
+        /* Os selos que antes vinham desenhados na arte. */
+        .plan-selo {
+            position: absolute;
+            top: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        .plan-selo-off { right: 10px; background: #ff6600; color: #ffffff; }
+        .plan-selo-melhor { left: 10px; background: #2563eb; color: #ffffff; }
 
         .plan-card-body {
             padding: 30px 20px;
@@ -391,8 +466,8 @@
 
     <section class="plans-hero">
         <div class="container capa-texto">
-            <h1>Planos</h1>
-            <p class="capa-frase">Coloque sua empresa onde seus clientes estão procurando. <strong>Guia Comercial Buritis e Região</strong></p>
+            <h1>Seja bem-vindo ao portal do comércio do Buritis e região</h1>
+            <p class="capa-frase">Coloque sua empresa onde seus clientes estão procurando. <strong>Escolha o seu plano</strong></p>
             <p><a href="index.html">Início</a> &gt; Planos</p>
         </div>
     </section>
@@ -403,8 +478,12 @@
                 
                 <div class="plan-card">
                     <div class="plan-card-header">
-                        <img src="assets/img/planos/plano-trimestral.jpg" alt="Plano Trimestral por R$ 29,70, equivale a R$ 9,90 por mês">
-                        <h3 class="so-para-leitor">Plano Trimestral — R$ 29,70, equivale a R$ 9,90 por mês</h3>
+                        <img src="assets/img/planos/capa-trimestral.jpg" alt="Os prédios do Buritis com o morro ao fundo">
+                        <div class="plan-card-preco">
+                            <span class="valor">R$ 29<span>,70</span></span>
+                            <h3 class="nome">Trimestral</h3>
+                            <span class="mes">equivale a <strong>R$ 9,90</strong> por mês</span>
+                        </div>
                     </div>
                     <div class="plan-card-body">
                         <ul class="plan-features">
@@ -422,8 +501,13 @@
 
                 <div class="plan-card">
                     <div class="plan-card-header">
-                        <img src="assets/img/planos/plano-semestral.jpg" alt="Plano Semestral por R$ 53,46, equivale a R$ 8,91 por mês, com 10% de desconto">
-                        <h3 class="so-para-leitor">Plano Semestral — R$ 53,46, equivale a R$ 8,91 por mês, com 10% de desconto</h3>
+                        <img src="assets/img/planos/capa-semestral.jpg" alt="Rua do Buritis à noite, com o comércio aceso">
+                        <span class="plan-selo plan-selo-off">10% OFF</span>
+                        <div class="plan-card-preco">
+                            <span class="valor">R$ 53<span>,46</span></span>
+                            <h3 class="nome">Semestral</h3>
+                            <span class="mes">equivale a <strong>R$ 8,91</strong> por mês</span>
+                        </div>
                     </div>
                     <div class="plan-card-body">
                         <ul class="plan-features">
@@ -441,8 +525,14 @@
 
                 <div class="plan-card featured">
                     <div class="plan-card-header">
-                        <img src="assets/img/planos/plano-anual.jpg" alt="Plano Anual por R$ 100,98, equivale a R$ 8,42 por mês, com 15% de desconto. Melhor custo-benefício">
-                        <h3 class="so-para-leitor">Plano Anual — R$ 100,98, equivale a R$ 8,42 por mês, com 15% de desconto. Melhor custo-benefício</h3>
+                        <img src="assets/img/planos/capa-anual.jpg" alt="Vista dos prédios do Buritis no fim da tarde">
+                        <span class="plan-selo plan-selo-melhor">MELHOR CUSTO-BENEFÍCIO</span>
+                        <span class="plan-selo plan-selo-off">15% OFF</span>
+                        <div class="plan-card-preco">
+                            <span class="valor">R$ 100<span>,98</span></span>
+                            <h3 class="nome">Anual</h3>
+                            <span class="mes">equivale a <strong>R$ 8,42</strong> por mês</span>
+                        </div>
                     </div>
                     <div class="plan-card-body">
                         <ul class="plan-features">
