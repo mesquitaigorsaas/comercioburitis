@@ -184,10 +184,12 @@
 
         .plan-card-preco .mes strong { color: #ff8a3d; }
 
-        /* Os selos que antes vinham desenhados na arte. */
+        /* O selo de desconto no canto de BAIXO, e não em cima: a faixa da
+           foto tem pouca altura, e no topo ele caía sobre o preço. */
         .plan-selo {
             position: absolute;
-            top: 10px;
+            right: 10px;
+            bottom: 10px;
             font-size: 0.7rem;
             font-weight: 700;
             letter-spacing: 0.5px;
@@ -195,8 +197,19 @@
             border-radius: 999px;
         }
 
-        .plan-selo-off { right: 10px; background: #ff6600; color: #ffffff; }
-        .plan-selo-melhor { left: 10px; background: #2563eb; color: #ffffff; }
+        .plan-selo-off { background: #ff6600; color: #ffffff; }
+
+        /* "Melhor custo-benefício" é frase comprida: como selo, cobria
+           metade da foto. Vira faixa acima dela, na largura do card. */
+        .plan-faixa-melhor {
+            background: #2563eb;
+            color: #ffffff;
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 7px 10px;
+        }
 
         .plan-card-body {
             padding: 30px 20px;
@@ -524,9 +537,9 @@
                 </div>
 
                 <div class="plan-card featured">
+                    <div class="plan-faixa-melhor">MELHOR CUSTO-BENEFÍCIO</div>
                     <div class="plan-card-header">
                         <img src="assets/img/planos/capa-anual.jpg" alt="Vista dos prédios do Buritis no fim da tarde">
-                        <span class="plan-selo plan-selo-melhor">MELHOR CUSTO-BENEFÍCIO</span>
                         <span class="plan-selo plan-selo-off">15% OFF</span>
                         <div class="plan-card-preco">
                             <span class="valor">R$ 100<span>,98</span></span>
