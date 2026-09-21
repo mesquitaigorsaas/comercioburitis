@@ -14,6 +14,7 @@
     <script src="assets/js/geo.js"></script>
     <script src="assets/js/menu-promocao.js"></script>
     <script src="assets/js/loja.js"></script>
+    <script src="assets/js/exemplos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -627,6 +628,32 @@
             height: 100%;
             object-fit: cover;
         }
+
+        /* Selo dos anúncios de exemplo. Eles só aparecem enquanto a
+           vitrine está vazia, e precisam se identificar: quem chega não
+           pode confundir demonstração com anunciante pagante. */
+        .selo-exemplo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(24, 24, 27, 0.85);
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        .aviso-exemplos {
+            grid-column: 1 / -1;
+            margin-bottom: 4px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .aviso-exemplos a { color: #ff6600; font-weight: 600; }
 
         .badge-cat-icon {
             position: absolute;
@@ -1447,6 +1474,50 @@
             linha.hidden = false;
         }
 
+        /**
+         * Os cinco anúncios de exemplo, de assets/js/exemplos.js.
+         *
+         * Sem link para a página de detalhes e sem botão de WhatsApp: a
+         * loja não existe, e um clique que leva a lugar nenhum — ou a um
+         * número que ninguém atende — ensina quem chega a desconfiar do
+         * guia inteiro. Ficam só o selo de aberto e o de entrega, que é
+         * o que o card de verdade mostra.
+         */
+        function desenharExemplos(container) {
+            // Acrescenta, não substitui: quando já existe anunciante de
+            // verdade, ele fica na frente e os exemplos completam a
+            // vitrine embaixo.
+            const aviso = document.createElement('p');
+            aviso.className = 'aviso-exemplos';
+            aviso.innerHTML = 'Os anúncios abaixo são exemplos e mostram como a sua loja '
+                + 'aparece aqui. <a href="planos.html">Anuncie a sua</a>.';
+            container.appendChild(aviso);
+
+            window.EXEMPLOS.forEach((exemplo) => {
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+                card.innerHTML = `
+                    <div class="listing-image-wrapper">
+                        <img src="${exemplo.imagem_url}" class="listing-img" alt="${exemplo.titulo}">
+                        <span class="selo-exemplo">EXEMPLO</span>
+                    </div>
+                    <div class="listing-body">
+                        <h3 class="listing-title">${exemplo.titulo}</h3>
+                        <p class="listing-category"><i class="fa-solid fa-tag"></i> ${exemplo.categoria}</p>
+                        <p class="listing-description">${exemplo.descricao}</p>
+                    </div>
+                    <div class="listing-footer">
+                        <span class="selo ${exemplo.aberto ? 'selo-aberto' : 'selo-fechado'}">
+                            <i class="fa-solid fa-circle"></i> ${exemplo.aberto ? 'ABERTO' : 'FECHADO'}
+                        </span>
+                        ${exemplo.entrega
+                            ? '<span class="selo selo-entrega"><i class="fa-solid fa-motorcycle"></i> ENTREGA</span>'
+                            : ''}
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
         async function carregarAnuncios(cidadeFiltro, categoriaFiltro) {
             const container = document.getElementById('listingsContainer');
             container.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1 / -1;">Buscando estabelecimentos...</p>';
@@ -1552,6 +1623,17 @@
                 montarCabecalhoDaListagem(categoriaFiltro, data ? data.length : 0);
 
                 if (!data || data.length === 0) {
+                    // Vitrine vazia: entram os cinco exemplos, para quem
+                    // chega ver como um anúncio aparece aqui. Só quando
+                    // não há categoria escolhida: dentro de uma categoria,
+                    // cinco lojas que não são dela confundem mais do que
+                    // ajudam. No dia do primeiro anunciante, somem sozinhos.
+                    if (!categoriaFiltro && window.EXEMPLOS && window.EXEMPLOS.length) {
+                        container.innerHTML = '';
+                        desenharExemplos(container);
+                        return;
+                    }
+
                     container.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1 / -1; padding: 40px 0;">Nenhum anúncio encontrado para esta busca.</p>';
                     return;
                 }
@@ -1576,6 +1658,15 @@ card.innerHTML = `
 `;
                     container.appendChild(card);
                 });
+
+                // Vitrine ainda curta: os exemplos completam a fileira,
+                // sempre depois dos anunciantes de verdade e sempre
+                // marcados como exemplo. Passando de cinco lojas reais,
+                // eles somem sozinhos — e ninguém precisa lembrar de
+                // tirá-los no dia certo.
+                if (!categoriaFiltro && data.length < 6 && window.EXEMPLOS && window.EXEMPLOS.length) {
+                    desenharExemplos(container);
+                }
 
             } catch (err) {
                 console.error('Erro ao carregar anúncios:', err.message);
