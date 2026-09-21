@@ -655,6 +655,27 @@
 
         .aviso-exemplos a { color: #ff6600; font-weight: 600; }
 
+        /* Selo de quem comprou destaque. Sem ele, o destaque só mudava a
+           ordem — e ninguém percebe que está na frente, nem quem pagou
+           nem quem procura. */
+        .selo-destaque {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #ff6600;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        .selo-destaque i { font-size: 0.6rem; }
+
         .badge-cat-icon {
             position: absolute;
             bottom: 12px;
@@ -1647,6 +1668,7 @@ card.innerHTML = `
     <a href="anuncio-detalhes.html?id=${anuncio.id}" style="cursor: pointer; text-decoration: none; color: inherit; display: block;">
         <div class="listing-image-wrapper">
             <img src="${anuncio.imagem_url}" class="listing-img" alt="${anuncio.titulo}">
+            ${anuncio.destaque ? '<span class="selo-destaque"><i class="fa-solid fa-star"></i> DESTAQUE</span>' : ''}
         </div>
         <div class="listing-body">
             <h3 class="listing-title">${anuncio.titulo}</h3>
